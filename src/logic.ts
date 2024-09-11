@@ -5,7 +5,9 @@ import { shuffleArray } from "@tonai/game-utils"
 import { initialDeck } from "./constants"
 
 export interface GameState {
+  dealerIndex: number
   deck: Cards
+  playerCards: Record<PlayerId, Cards>
   playerIds: PlayerId[]
   playersReady: PlayerId[]
   step: Step
@@ -20,13 +22,15 @@ declare global {
 }
 
 Dusk.initLogic({
-  minPlayers: 2,
+  minPlayers: 6,
   maxPlayers: 6,
   setup: (allPlayerIds) => ({
+    dealerIndex: 0,
     deck: [],
+    playerCards: {},
     playerIds: allPlayerIds,
     playersReady: [],
-    step: Step.WAIT
+    step: Step.WAIT,
   }),
   actions: {
     ready(_, { game, playerId }) {
@@ -40,12 +44,39 @@ Dusk.initLogic({
         game.playersReady.push(playerId)
         if (game.playersReady.length === game.playerIds.length) {
           // Start game
+          game.step = Step.PLAY
+          game.dealerIndex = 0
+          // Shuffle deck and deal 2 cards per players
           const deck = [...initialDeck]
           shuffleArray(deck)
-          game.step = Step.PLAY
+          const players = game.playerIds
+            .slice(game.dealerIndex)
+            .concat(game.playerIds.slice(0, game.dealerIndex))
+          for (const id of players) {
+            game.playerCards[id] = [deck.shift()!]
+          }
+          for (const id of players) {
+            game.playerCards[id].push(deck.shift()!)
+          }
           game.deck = deck
         }
       }
-    }
+    },
+  },
+  events: {
+    playerJoined(playerId, { game }) {
+      if (game.step === Step.WAIT) {
+        game.playerIds.push(playerId)
+      } else {
+        // Spectator (TODO)
+      }
+    },
+    playerLeft(playerId, { game }) {
+      if (game.step === Step.WAIT) {
+        game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
+      } else {
+        // If a player left during the game (TODO)
+      }
+    },
   },
 })

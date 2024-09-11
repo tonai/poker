@@ -2,7 +2,7 @@
 import { onMounted } from "vue"
 
 import { Defs } from "../cards"
-import { playerId, playerIds, playersReady, step } from "../store"
+import { dealerIndex, playerId, playerCards, playerIds, playersReady, step } from "../store"
 import { Step } from "../types"
 
 import Play from './Play.vue';
@@ -13,6 +13,12 @@ onMounted(() => {
     onChange: ({ game, yourPlayerId }) => {
       if (yourPlayerId && playerId.value !== yourPlayerId) {
         playerId.value = yourPlayerId
+      }
+      if (dealerIndex.value !== game.dealerIndex) {
+        dealerIndex.value = game.dealerIndex
+      }
+      if (playerCards.value !== game.playerCards) {
+        playerCards.value = game.playerCards
       }
       if (playerIds.value !== game.playerIds) {
         playerIds.value = game.playerIds

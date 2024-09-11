@@ -5,13 +5,14 @@ import CardBack from "./CardBack.vue"
 import CardFront from "./CardFront.vue"
 
 defineProps<{
+  flipped: boolean
   rank: Rank
   suit: Suit
 }>()
 </script>
 
 <template>
-  <div class="card">
+  <div class="card" :class="{ flipped }">
     <CardFront :rank="rank" :suit="suit"/>
     <CardBack class="back"/>
   </div>
@@ -24,6 +25,9 @@ defineProps<{
   transform-style: preserve-3d;
   perspective: 1000px;
   transition: transform 200ms ease;
+}
+.flipped {
+  transform: rotateY(180deg);
 }
 .card > svg {
   grid-area: 1 / 1;
