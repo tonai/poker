@@ -1,0 +1,194 @@
+<script setup lang="ts">
+import { Suit } from "../types"
+
+defineProps<{
+  color: string
+  suit: Suit
+  suitId: string
+}>()
+</script>
+
+<template>
+  <template v-if="suit === '♠'">
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.5"
+      width="9.5"
+      transform="translate(32,-65)scale(1,0.972)rotate(33)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.5"
+      width="9.5"
+      transform="translate(24,-53)scale(1,0.972)rotate(33)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.5"
+      width="9.5"
+      transform="translate(15.5,-40.5)scale(1,0.972)rotate(33)"
+    ></use>
+  </template>
+  <template v-else-if="suit === '♥'">
+    <!-- WIDTH: (528-45)/1300*164.8-82.4 -->
+    <!-- HEIGHT: (749-45)/2000*260.8-130.4 -->
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="12.68"
+      width="12.68"
+      transform="translate(-19.5,-6.5)scale(1,0.972)rotate(0)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="12.68"
+      width="12.68"
+      transform="translate(2,6)scale(1,0.972)rotate(180)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(28,-35)scale(1,0.972)rotate(30)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(32.5,-43.5)scale(1,0.972)rotate(30)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(37,-52)scale(1,0.972)rotate(30)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(-54.2,-52.68)scale(1,0.972)rotate(60)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(-62.44,-40.29)scale(1,0.972)rotate(60)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(-75.5,-40.29)scale(1,0.972)rotate(60)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(-69.92,-27.64)scale(1,0.972)rotate(60)"
+    ></use>
+  </template>
+  <template v-else-if="suit === '♣'">
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(-23,-40)scale(1,0.972)rotate(0)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(-23,-25)scale(1,0.972)rotate(0)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="9.51"
+      width="9.51"
+      transform="translate(17.5,-51)scale(1,0.972)rotate(0)"
+    ></use>
+  </template>
+  <template v-else-if="suit === '♦'">
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="25.35"
+      width="25.35"
+      transform="translate(-12.68,-12.3)scale(1,0.972)rotate(0)"
+      stroke="#44F"
+      stroke-width="36"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+    ></use
+    ><use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(27.76,-55)scale(1,0.972)rotate(-26)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(22.44,-52)scale(1,0.972)rotate(-22)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(16.61,-49.5)scale(1,0.972)rotate(-14)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(10.4,-48.5)scale(1,0.972)rotate(-6)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(3.93,-48)scale(1,0.972)rotate(0)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(-2.41,-48.5)scale(1,0.972)rotate(5)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(-8.62,-49.5)scale(1,0.972)rotate(10)"
+    ></use>
+    <use
+      :xlink:href="suitId"
+      :fill="color"
+      height="6.34"
+      width="6.34"
+      transform="translate(-14,-51)scale(1,0.972)rotate(15)"
+    ></use>
+  </template>
+</template>
