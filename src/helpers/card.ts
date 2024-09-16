@@ -109,7 +109,7 @@ export function compareHands<T extends Hand | Combination>(
 }
 
 function getNOfAKind(ranks: Ranks, n: number): Combination[] {
-  let nOfAKind: Combination[] = []
+  const nOfAKind: Combination[] = []
   const entries = Object.entries(ranks)
   for (const [rank, combination] of entries) {
     if (combination.n === n) {
@@ -123,7 +123,7 @@ function getNOfAKind(ranks: Ranks, n: number): Combination[] {
 }
 
 function getFlush(suits: Suits) {
-  let flushes: Combination[] = []
+  const flushes: Combination[] = []
   const entries = Object.entries(suits)
   for (const [, combination] of entries) {
     if (combination.n === 5) {
@@ -141,7 +141,7 @@ interface Straight extends Combination {
 }
 
 function getStraights(ranks: Ranks): Straight[] {
-  let straights: Record<number, { [key in Suit]?: SortedCard }[]> = {}
+  const straights: Record<number, { [key in Suit]?: SortedCard }[]> = {}
   const entries = Object.entries(ranks)
   for (const [stringRank, combination] of entries) {
     const rank = Number(stringRank)
@@ -150,7 +150,10 @@ function getStraights(ranks: Ranks): Straight[] {
     )
     straights[rank] = [cardMap]
     let i = 1
-    while (straights[rank - i] !== undefined && straights[rank - i].length < 5) {
+    while (
+      straights[rank - i] !== undefined &&
+      straights[rank - i].length < 5
+    ) {
       straights[rank - i].push(cardMap)
       i++
     }

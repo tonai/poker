@@ -1,13 +1,16 @@
 import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
-import { Cards, Step } from "./types"
-import { shuffleArray } from "@tonai/game-utils"
-import { initialDeck } from "./constants"
+import { startBlind } from "./constants"
+import { Bet, Cards, PlayerCards, Step } from "./types"
+import { startRound } from "./logic/round"
 
 export interface GameState {
+  bets: Bet[]
+  blind: number
   dealerIndex: number
   deck: Cards
-  playerCards: Record<PlayerId, Cards>
+  playerCards: PlayerCards[]
+  playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
   playersReady: PlayerId[]
   step: Step
@@ -22,12 +25,15 @@ declare global {
 }
 
 Dusk.initLogic({
-  minPlayers: 6,
+  minPlayers: 2,
   maxPlayers: 6,
   setup: (allPlayerIds) => ({
+    bets: [],
+    blind: startBlind,
     dealerIndex: 0,
     deck: [],
-    playerCards: {},
+    playerCards: [],
+    playerChips: {},
     playerIds: allPlayerIds,
     playersReady: [],
     step: Step.WAIT,
@@ -37,30 +43,16 @@ Dusk.initLogic({
       if (game.step !== Step.WAIT) {
         return Dusk.invalidAction()
       }
-      const index = game.playersReady.indexOf(playerId)
+      startRound(game)
+      /*const index = game.playersReady.indexOf(playerId)
       if (index !== -1) {
         game.playersReady.splice(index, 1)
       } else {
         game.playersReady.push(playerId)
         if (game.playersReady.length === game.playerIds.length) {
-          // Start game
-          game.step = Step.PLAY
-          game.dealerIndex = 0
-          // Shuffle deck and deal 2 cards per players
-          const deck = [...initialDeck]
-          shuffleArray(deck)
-          const players = game.playerIds
-            .slice(game.dealerIndex)
-            .concat(game.playerIds.slice(0, game.dealerIndex))
-          for (const id of players) {
-            game.playerCards[id] = [deck.shift()!]
-          }
-          for (const id of players) {
-            game.playerCards[id].push(deck.shift()!)
-          }
-          game.deck = deck
+          startRound(game)
         }
-      }
+      }*/
     },
   },
   events: {

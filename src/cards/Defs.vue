@@ -6,7 +6,12 @@ import DefFiguresHeart from "../cards/DefFiguresHeart.vue"
 import DefFiguresSpade from "../cards/DefFiguresSpade.vue"
 import DefSuits from "../cards/DefSuits.vue"
 
-import { withFiguresClub, withFiguresDiamond, withFiguresHeart, withFiguresSpade } from './store';
+import {
+  withFiguresClub,
+  withFiguresDiamond,
+  withFiguresHeart,
+  withFiguresSpade,
+} from "./store"
 </script>
 
 <template>

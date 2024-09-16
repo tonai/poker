@@ -5,7 +5,12 @@ import { Rank, Suit } from "../types"
 
 import Background from "./Background.vue"
 import Front from "./Front.vue"
-import { withFiguresClub, withFiguresDiamond, withFiguresHeart, withFiguresSpade } from './store';
+import {
+  withFiguresClub,
+  withFiguresDiamond,
+  withFiguresHeart,
+  withFiguresSpade,
+} from "./store"
 
 const props = defineProps<{
   rank: Rank
@@ -14,14 +19,14 @@ const props = defineProps<{
 
 watchEffect(() => {
   switch (props.suit) {
-    case '♣':
-      return withFiguresClub.value = true
-    case '♦':
-      return withFiguresDiamond.value = true
-    case '♥':
-      return withFiguresHeart.value = true
-    case '♠':
-      return withFiguresSpade.value = true
+    case "♣":
+      return (withFiguresClub.value = true)
+    case "♦":
+      return (withFiguresDiamond.value = true)
+    case "♥":
+      return (withFiguresHeart.value = true)
+    case "♠":
+      return (withFiguresSpade.value = true)
   }
 })
 </script>

@@ -13,8 +13,8 @@ defineProps<{
 
 <template>
   <div class="card" :class="{ flipped }">
-    <CardFront :rank="rank" :suit="suit"/>
-    <CardBack class="back"/>
+    <CardFront :rank="rank" :suit="suit" />
+    <CardBack class="back" />
   </div>
 </template>
 

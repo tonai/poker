@@ -59,9 +59,9 @@ const suitId = computed(() => `#${props.suit}`)
     ></use>
   </g>
   <!-- Pips -->
-  <Pips :color="color" :rank="rank" :suitId="suitId" />
+  <Pips :color="color" :rank="rank" :suit-id="suitId" />
   <!-- Figures -->
-  <template v-for="n in 6">
+  <template v-for="n in 6" :key="n">
     <Figure :n="n" :rank="rank" :suit="suit" />
     <g transform="rotate(180)">
       <Figure :n="n" :rank="rank" :suit="suit" />
@@ -69,23 +69,23 @@ const suitId = computed(() => `#${props.suit}`)
   </template>
   <!-- Jack -->
   <template v-if="rank === 'J'">
-    <Jack :color="color" :suit="suit" :suitId="suitId" />
+    <Jack :color="color" :suit="suit" :suit-id="suitId" />
     <g transform="rotate(180)">
-      <Jack :color="color" :suit="suit" :suitId="suitId" />
+      <Jack :color="color" :suit="suit" :suit-id="suitId" />
     </g>
   </template>
   <!-- Queen -->
   <template v-if="rank === 'Q'">
-    <Queen :color="color" :suit="suit" :suitId="suitId" />
+    <Queen :color="color" :suit="suit" :suit-id="suitId" />
     <g transform="rotate(180)">
-      <Queen :color="color" :suit="suit" :suitId="suitId" />
+      <Queen :color="color" :suit="suit" :suit-id="suitId" />
     </g>
   </template>
   <!-- King -->
   <template v-if="rank === 'K'">
-    <King :color="color" :suit="suit" :suitId="suitId" />
+    <King :color="color" :suit="suit" :suit-id="suitId" />
     <g transform="rotate(180)">
-      <King :color="color" :suit="suit" :suitId="suitId" />
+      <King :color="color" :suit="suit" :suit-id="suitId" />
     </g>
   </template>
   <!-- Rect -->
@@ -127,10 +127,7 @@ const suitId = computed(() => `#${props.suit}`)
   </template>
   <!-- Figure Right Suit -->
   <template
-    v-if="
-      (rank === 'J' && suit !== '♠') ||
-      (rank === 'Q' && suit !== '♥')
-    "
+    v-if="(rank === 'J' && suit !== '♠') || (rank === 'Q' && suit !== '♥')"
   >
     <use
       :xlink:href="suitId"

@@ -13,7 +13,7 @@ export default defineConfig({
     dusk({
       logicPath: path.resolve("./src/logic.ts"),
       minifyLogic: false, // This flag can be used if your logic reaches the allowed limit. However, it will make it significantly more difficult to detect validation issues
-      ignoredDependencies: [],
+      ignoredDependencies: ["@tonai/game-utils/server"],
     }),
   ],
 })

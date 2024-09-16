@@ -1,77 +1,58 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-import { createArray, randomInt } from "@tonai/game-utils"
 
-import { Card } from "../cards"
-import { playerCards, playerIds, otherPlayers } from "../store"
+import { otherPlayers, playerId } from "../store"
+import { Position } from "../types"
 
-import Avatar from "./Avatar.vue"
+import Deal from "./Deal.vue"
+import MainPlayer from "./MainPlayer.vue"
+import Player from "./Player.vue"
+import Pot from "./Pot.vue"
 
-const intervalDelay = 500
-const animationDelay = 100
-
-const playerRefs = ref<HTMLDivElement[]>([])
-const cardPositions = ref(
-  createArray(playerIds.value.length * 2).fill({ left: "50%", top: "50%" })
+const playerRefs = ref<InstanceType<typeof Player>[]>([])
+const boundings = computed(() =>
+  playerRefs.value
+    .filter((ref) => ref.ref)
+    .map((ref) => ref.ref!.getBoundingClientRect())
 )
-const playerPositions = computed(() =>
-  playerRefs.value.map((ref) => {
-    const { height, left, top, width } = ref.getBoundingClientRect()
-    return { left: `${left + width / 2}px`, top: `${top + height}px` }
-  })
-)
-
-const deal = computed(() => {
-  const entries = Object.entries(playerCards.value)
-  return entries
-    .map(([id, cards]) => ({ id, card: cards[0] }))
-    .concat(entries.map(([id, cards]) => ({ id, card: cards[1] })))
+const playerCardPositions = computed(() => {
+  const entries = boundings.value.map(({ height, left, top, width }, index) => {
+    return [
+      otherPlayers.value[index],
+      { left: `${left + width / 2}px`, top: `${top + height}px` },
+    ]
+  }) as [string, Position][]
+  entries.push([playerId.value, { left: "50%", top: "80%" }])
+  return Object.fromEntries(entries)
 })
-const animateIndex = ref(1)
-const animatedDeal = computed(() => deal.value.slice(0, animateIndex.value))
+const playerChipsPositions = computed(() => {
+  const entries = boundings.value.map(({ height, left, top, width }, index) => {
+    return [
+      otherPlayers.value[index],
+      { left: `${left + width / 2}px`, top: `${top + height}px` },
+    ]
+  }) as [string, Position][]
+  entries.push([
+    playerId.value,
+    { left: "calc(var(--size) * 15)", top: "calc(var(--size) * 181)" },
+  ])
+  return Object.fromEntries(entries)
+})
 
-function animate() {
-  setTimeout(() => {
-    const cardPlayerId = deal.value[animateIndex.value - 1].id
-    const index = otherPlayers.value.findIndex((id) => id === cardPlayerId)
-    cardPositions.value[animateIndex.value - 1] =
-      index === -1
-        ? { left: "50%", top: "80%" }
-        : { ...playerPositions.value[index], scale: 0.5 }
-    cardPositions.value[animateIndex.value - 1].rotate =
-      `${randomInt(360, -360)}deg`
-  }, animationDelay)
-}
-
+const showDeal = ref(false)
 onMounted(() => {
-  animate()
-  const interval = setInterval(() => {
-    if (animateIndex.value === deal.value.length) {
-      clearInterval(interval)
-    } else {
-      animateIndex.value++
-      animate()
-    }
-  }, intervalDelay)
+  setTimeout(() => (showDeal.value = true), 1000)
 })
 </script>
 
 <template>
   <div class="play">
+    <Deal v-if="showDeal" :player-positions="playerCardPositions" />
+    <Pot :player-positions="playerChipsPositions" />
     <div class="players">
-      <div v-for="id of otherPlayers" :key="id" class="player" ref="playerRefs">
-        <Avatar :id="id" name />
-      </div>
+      <Player v-for="id of otherPlayers" :id="id" :key="id" ref="playerRefs" />
     </div>
-    <Card
-      v-for="({ card }, index) of animatedDeal"
-      :key="`${card.rank}${card.suit}`"
-      class="card"
-      flipped
-      :rank="'J'"
-      suit="♣"
-      :style="cardPositions[index]"
-    />
+    <MainPlayer />
   </div>
 </template>
 
@@ -82,19 +63,17 @@ onMounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 .players {
   display: flex;
-  gap: 1vw;
-  padding: 0 1vw;
-}
-.player {
-  flex: 1;
+  gap: var(--size);
+  padding: 0 var(--size);
 }
 .card {
   position: absolute;
   translate: -50% 0;
-  width: 20vw;
-  transition: all 1000ms cubic-bezier(.28,.8,.5,.95);
+  width: calc(var(--size) * 20);
+  transition: all 1000ms cubic-bezier(0.28, 0.8, 0.5, 0.95);
 }
 </style>

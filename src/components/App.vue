@@ -2,11 +2,20 @@
 import { onMounted } from "vue"
 
 import { Defs } from "../cards"
-import { dealerIndex, playerId, playerCards, playerIds, playersReady, step } from "../store"
+import {
+  bets,
+  dealerIndex,
+  playerId,
+  playerCards,
+  playerChips,
+  playerIds,
+  playersReady,
+  step,
+} from "../store"
 import { Step } from "../types"
 
-import Play from './Play.vue';
-import StartScreen from './StartScreen.vue';
+import Play from "./Play.vue"
+import StartScreen from "./StartScreen.vue"
 
 onMounted(() => {
   Dusk.initClient({
@@ -14,11 +23,17 @@ onMounted(() => {
       if (yourPlayerId && playerId.value !== yourPlayerId) {
         playerId.value = yourPlayerId
       }
+      if (bets.value !== game.bets) {
+        bets.value = game.bets
+      }
       if (dealerIndex.value !== game.dealerIndex) {
         dealerIndex.value = game.dealerIndex
       }
       if (playerCards.value !== game.playerCards) {
         playerCards.value = game.playerCards
+      }
+      if (playerChips.value !== game.playerChips) {
+        playerChips.value = game.playerChips
       }
       if (playerIds.value !== game.playerIds) {
         playerIds.value = game.playerIds
@@ -35,9 +50,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <Defs/>
-  <StartScreen v-if="step === Step.WAIT"/>
-  <Play v-if="step === Step.PLAY"/>
+  <Defs />
+  <StartScreen v-if="step === Step.WAIT" />
+  <Play v-if="step === Step.PLAY" />
 </template>
 
 <style scoped>

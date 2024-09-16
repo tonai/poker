@@ -5,20 +5,7 @@
 //   DIAMONDS,
 // }
 
-export type Rank =
-  | 1
-  | 2
-  | 3
-  | 4
-  | 5
-  | 6
-  | 7
-  | 8
-  | 9
-  | 10
-  | 'J'
-  | 'Q'
-  | 'K'
+export type Rank = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | "J" | "Q" | "K"
 
 export type SortedRank =
   | 2
@@ -35,7 +22,7 @@ export type SortedRank =
   | 13 // K
   | 14 // A
 
-export type Suit = '♣' | '♠' | '♥' | '♦'
+export type Suit = "♣" | "♠" | "♥" | "♦"
 
 export interface Card {
   rank: Rank

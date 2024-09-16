@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playerId, playersReady } from '../store'
+import { playerId, playersReady } from "../store"
 
 function ready() {
   Dusk.actions.ready()
@@ -7,5 +7,11 @@ function ready() {
 </script>
 
 <template>
-  <button :class="{ selected: playersReady.includes(playerId) }" type="button" @click="ready">Ready</button>
+  <button
+    :class="{ selected: playersReady.includes(playerId) }"
+    type="button"
+    @click="ready"
+  >
+    Ready
+  </button>
 </template>

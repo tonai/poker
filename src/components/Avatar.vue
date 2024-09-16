@@ -2,6 +2,10 @@
 import { Player, PlayerId } from "dusk-games-sdk"
 import { computed } from "vue"
 
+import { dealerId } from "../store"
+
+import Dealer from "./Dealer.vue"
+
 const props = defineProps<{
   id?: PlayerId
   name?: boolean
@@ -18,6 +22,7 @@ const player = computed(
     <div v-if="name" class="name">{{ player.displayName }}</div>
     <div class="wrapper">
       <img class="image" :src="player.avatarUrl" />
+      <Dealer v-if="dealerId === id" class="dealer" />
     </div>
   </div>
 </template>
@@ -32,11 +37,11 @@ const player = computed(
 }
 .name {
   text-align: center;
-  margin-top: 1vw;
+  margin-top: var(--size);
   background-color: white;
-  padding: 1vw;
-  border-radius: 2vw;
-  font-size: 5vw;
+  padding: var(--size);
+  border-radius: calc(var(--size) * 2);
+  font-size: calc(var(--size) * 5);
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -45,19 +50,17 @@ const player = computed(
   box-sizing: border-box;
 }
 .name + .wrapper {
-  margin-top: 10vw;
+  margin-top: calc(var(--size) * 10);
 }
 .wrapper {
   aspect-ratio: 1 / 1;
   position: relative;
   width: 100%;
-  max-width: 30vw;
+  max-width: calc(var(--size) * 15);
 }
 .image {
   display: block;
-  border: min(1vw, 0.5vh) solid var(--border-color);
   border-radius: 50%;
-  background-color: var(--border-color);
   box-sizing: border-box;
   max-width: 100%;
   max-height: 100%;
@@ -65,5 +68,10 @@ const player = computed(
   aspect-ratio: 1 / 1;
   left: 50%;
   translate: -50% 0;
+}
+.dealer {
+  position: absolute;
+  top: calc(var(--size) * -1);
+  right: calc(var(--size) * -1);
 }
 </style>
