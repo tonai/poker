@@ -29,9 +29,15 @@ function select(type: "checkOrCall" | "fold" | "raise") {
 
 function confirm() {
   if (action.value) {
+    let amount = 0
+    if (action.value === "checkOrCall") {
+      amount = minBet.value
+    } else if (action.value === "raise") {
+      amount = raiseValue.value
+    }
     Dusk.actions.action({
       type: action.value,
-      amount: action.value === "checkOrCall" ? minBet.value : raiseValue.value,
+      amount,
     })
     action.value = undefined
   }

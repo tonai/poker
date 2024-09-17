@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { createArray, randomInt } from "@tonai/game-utils"
 
 import { Card } from "../cards"
-import { playerCards, playerId, playerIds } from "../store"
+import { foldPlayers, playerCards, playerId, playerIds } from "../store"
 import { CardPosition, Position } from "../types"
 
 const props = defineProps<{
@@ -46,10 +46,10 @@ function reveal() {
     if (id === playerId.value) {
       cardPositions.value[index].rotate = "0deg"
       if (first) {
-        cardPositions.value[index].translate = "-120% -10%"
+        cardPositions.value[index].translate = "-100% -10%"
         first = false
       } else {
-        cardPositions.value[index].translate = "-15% -10%"
+        cardPositions.value[index].translate = "5% -10%"
       }
     }
   })
@@ -68,6 +68,19 @@ onMounted(() => {
     }
   }, intervalDelay)
 })
+
+watch(foldPlayers, () => {
+  for (const id of foldPlayers.value) {
+    deal.value.forEach((card, index) => {
+      if (card.id === id) {
+        cardPositions.value[index].translate = "-50% 0"
+        cardPositions.value[index].left = "calc(100% - var(--size) * 20)"
+        cardPositions.value[index].top = "calc(100% - var(--size) * 40)"
+        cardPositions.value[index].scale = 0.65
+      }
+    })
+  }
+})
 </script>
 
 <template>
@@ -75,7 +88,11 @@ onMounted(() => {
     v-for="({ card, id }, index) of animatedDeal"
     :key="`${card.rank}${card.suit}`"
     class="card"
-    :flipped="id !== playerId || !isRevealed"
+    :class="{
+      pulsate:
+        id === playerId && canPlay && !isRevealed && !foldPlayers.includes(id),
+    }"
+    :flipped="id !== playerId || !isRevealed || foldPlayers.includes(id)"
     :rank="card.rank"
     :suit="card.suit"
     :style="cardPositions[index]"
@@ -89,6 +106,20 @@ onMounted(() => {
   translate: -50% 0;
   width: calc(var(--size) * 20);
   transition: all 1000ms cubic-bezier(0.28, 0.8, 0.5, 0.95);
+}
+.pulsate {
+  animation: 2s linear infinite both pulse;
+}
+@keyframes pulse {
+  0% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.2;
+  }
+  100% {
+    scale: 1;
+  }
 }
 .reveal {
   position: absolute;

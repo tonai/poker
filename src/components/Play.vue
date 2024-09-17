@@ -23,7 +23,7 @@ const playerCardPositions = computed(() => {
       { left: `${left + width / 2}px`, top: `${top + height}px` },
     ]
   }) as [string, Position][]
-  entries.push([playerId.value, { left: "50%", top: "80%" }])
+  entries.push([playerId.value, { left: "45%", top: "80%" }])
   return Object.fromEntries(entries)
 })
 const playerChipsPositions = computed(() => {
