@@ -1,41 +1,42 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue"
+import { onMounted, ref, watch } from "vue"
 
-import { bets } from "../store"
-import { Position } from "../types"
+import { bets, roundWinners } from "../store"
+import { PilePosition, Position } from "../types"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
 
-defineProps<{
+const props = defineProps<{
   playerPositions: Record<string, Position>
 }>()
 
-const animated = ref<boolean[]>([])
-const totalRef = ref<HTMLDivElement>()
-const totalPosition = computed(() => {
-  if (totalRef.value) {
-    const { height, left, top } = totalRef.value.getBoundingClientRect()
-    return {
-      left: `${left}px`,
-      top: `calc(${top + height}px - var(--size)* 11)`,
-    }
-  }
-  return {}
-})
+const position = {
+  left: "calc(100% - var(--size) * 20)",
+  top: "calc(100% - var(--size) * 25)",
+}
+
+const betPositions = ref<PilePosition[]>([])
 const total = ref(0)
 
-function startTotalAnimation() {
+// Bet
+const betLength = ref(bets.value.length)
+function startTotalAnimation(indexes: number[]) {
   setTimeout(() => {
     total.value = bets.value.reduce((acc, { amount }) => acc + amount, 0)
+    indexes.forEach((i) => (betPositions.value[i].display = "none"))
   }, 1000)
 }
-
 function startBetAnimation(indexes: number[]) {
-  setTimeout(() => indexes.forEach((i) => (animated.value[i] = true)), 100)
-  startTotalAnimation()
+  setTimeout(
+    () => indexes.forEach((i) => (betPositions.value[i] = { ...position })),
+    100
+  )
+  startTotalAnimation(indexes)
 }
-const betLength = ref(bets.value.length)
+onMounted(() => {
+  startBetAnimation([0, 1])
+})
 watch(bets, () => {
   if (bets.value.length > betLength.value) {
     startBetAnimation([betLength.value]) // should increment 1 by 1
@@ -43,26 +44,47 @@ watch(bets, () => {
   }
 })
 
-onMounted(() => {
-  startBetAnimation([0, 1])
+// Pot win
+const totalPosition = ref<Record<string, Position>>({})
+const animationEnd = ref(false)
+watch(roundWinners, () => {
+  setTimeout(() => {
+    totalPosition.value = Object.fromEntries(
+      Object.keys(roundWinners.value).map((id) => [
+        id,
+        props.playerPositions[id],
+      ])
+    )
+    total.value = 0
+  }, 1200)
+  setTimeout(() => {
+    animationEnd.value = true
+  }, 2200)
 })
 </script>
 
 <template>
+  <div class="pot">
+    <div class="title">Pot</div>
+    <Amount :amount="total" class="amount" />
+  </div>
   <ChipPile
     v-for="(bet, index) of bets"
     :key="index"
     :amount="bet.amount"
     class="pile"
-    :style="animated[index] ? totalPosition : playerPositions[bet.id]"
+    :style="betPositions[index] ?? playerPositions[bet.id]"
   />
-  <div class="pot">
-    <div class="title">Pot</div>
-    <div ref="totalRef" class="total">
-      <ChipPile :amount="total" class="total-pile" />
-    </div>
-    <Amount :amount="total" class="amount" />
-  </div>
+  <template v-if="!animationEnd">
+    <ChipPile
+      v-for="(amount, id) of roundWinners"
+      :key="id"
+      :amount="amount"
+      class="pile"
+      :style="totalPosition[id] ?? position"
+    />
+  </template>
+  <ChipPile :amount="total" class="total-pile" :style="position" />
 </template>
 
 <style scoped>
@@ -83,17 +105,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   color: white;
   padding: calc(var(--size) * 2) 0;
 }
 .title {
   font-size: calc(var(--size) * 7);
 }
-.total {
-  flex: 1;
-}
-.total-pile {
-  bottom: 0;
+.pot .total-pile {
+  position: fixed;
 }
 .pot .amount {
   font-size: calc(var(--size) * 7);

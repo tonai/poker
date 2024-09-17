@@ -2,18 +2,20 @@ import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
 import { startBlind } from "./constants"
 import { Action, Bet, Cards, PlayerCards, Step } from "./types"
-import { startRound } from "./logic/round"
+import { endRound, startRound } from "./logic/round"
 
 export interface GameState {
   bets: Bet[]
   blind: number
   dealerIndex: number
   deck: Cards
+  hand: number
   playerCards: PlayerCards[]
   playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
   playersReady: PlayerId[]
   round: number
+  roundWinners: Record<PlayerId, number>
   step: Step
   turnIndex: number
 }
@@ -33,13 +35,15 @@ Dusk.initLogic({
   setup: (allPlayerIds) => ({
     bets: [],
     blind: startBlind,
-    dealerIndex: 0,
+    dealerIndex: -1,
     deck: [],
+    hand: -1,
     playerCards: [],
     playerChips: {},
     playerIds: allPlayerIds,
     playersReady: [],
     round: 0,
+    roundWinners: {},
     step: Step.WAIT,
     turnIndex: 0,
   }),
@@ -59,6 +63,15 @@ Dusk.initLogic({
       const foldPlayers = game.bets
         .filter(({ type }) => type === "fold")
         .map(({ id }) => id)
+      // Everybody fold
+      if (foldPlayers.length === game.playerIds.length - 1) {
+        const winner = game.playerIds.find((id) => !foldPlayers.includes(id))
+        if (winner) {
+          const total = game.bets.reduce((acc, { amount }) => acc + amount, 0)
+          endRound(game, { [winner]: total })
+        }
+        return
+      }
       const roundBets = game.bets.filter(
         ({ id, round }) => round === game.round && !foldPlayers.includes(id)
       )

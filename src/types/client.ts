@@ -3,6 +3,10 @@ export interface Position {
   top?: string
 }
 
+export interface PilePosition extends Position {
+  display?: string
+}
+
 export interface CardPosition extends Position {
   rotate?: string
   scale?: number

@@ -4,6 +4,7 @@ import { Cards } from "./card"
 
 export enum Step {
   PLAY,
+  ROUND_END,
   WAIT,
 }
 

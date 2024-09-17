@@ -3,7 +3,13 @@ import { computed, onMounted, ref, watch } from "vue"
 import { createArray, randomInt } from "@tonai/game-utils"
 
 import { Card } from "../cards"
-import { foldPlayers, playerCards, playerId, playerIds } from "../store"
+import {
+  foldPlayers,
+  playerCards,
+  playerId,
+  playerIds,
+  roundWinners,
+} from "../store"
 import { CardPosition, Position } from "../types"
 
 const props = defineProps<{
@@ -69,8 +75,10 @@ onMounted(() => {
   }, intervalDelay)
 })
 
-watch(foldPlayers, () => {
-  for (const id of foldPlayers.value) {
+const discardIds = ref<string[]>([])
+function discard(id: string) {
+  if (!discardIds.value.includes(id)) {
+    discardIds.value.push(id)
     deal.value.forEach((card, index) => {
       if (card.id === id) {
         cardPositions.value[index].translate = "-50% 0"
@@ -79,6 +87,21 @@ watch(foldPlayers, () => {
         cardPositions.value[index].scale = 0.65
       }
     })
+  }
+}
+
+// Fold
+watch(foldPlayers, () => {
+  for (const id of foldPlayers.value) {
+    discard(id)
+  }
+})
+
+// End round
+watch(roundWinners, () => {
+  const ids = Object.keys(roundWinners.value)
+  for (const id of ids) {
+    discard(id)
   }
 })
 </script>
@@ -90,9 +113,9 @@ watch(foldPlayers, () => {
     class="card"
     :class="{
       pulsate:
-        id === playerId && canPlay && !isRevealed && !foldPlayers.includes(id),
+        id === playerId && canPlay && !isRevealed && !discardIds.includes(id),
     }"
-    :flipped="id !== playerId || !isRevealed || foldPlayers.includes(id)"
+    :flipped="id !== playerId || !isRevealed || discardIds.includes(id)"
     :rank="card.rank"
     :suit="card.suit"
     :style="cardPositions[index]"

@@ -6,12 +6,14 @@ import {
   bets,
   blind,
   dealerIndex,
+  hand,
   playerId,
   playerCards,
   playerChips,
   playerIds,
   playersReady,
   round,
+  roundWinners,
   step,
   turnIndex,
 } from "../store"
@@ -35,6 +37,9 @@ onMounted(() => {
       if (dealerIndex.value !== game.dealerIndex) {
         dealerIndex.value = game.dealerIndex
       }
+      if (hand.value !== game.hand) {
+        hand.value = game.hand
+      }
       if (playerCards.value !== game.playerCards) {
         playerCards.value = game.playerCards
       }
@@ -50,6 +55,9 @@ onMounted(() => {
       if (round.value !== game.round) {
         round.value = game.round
       }
+      if (roundWinners.value !== game.roundWinners) {
+        roundWinners.value = game.roundWinners
+      }
       if (step.value !== game.step) {
         step.value = game.step
       }
@@ -64,7 +72,7 @@ onMounted(() => {
 <template>
   <Defs />
   <StartScreen v-if="step === Step.WAIT" />
-  <Play v-if="step === Step.PLAY" />
+  <Play v-if="step === Step.PLAY || step === Step.ROUND_END" :key="hand" />
 </template>
 
 <style scoped>

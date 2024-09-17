@@ -1,15 +1,27 @@
 <script setup lang="ts">
+import { ref, watch } from "vue"
+
 import { dealerId, playerChips, playerId } from "../store"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
 import Dealer from "./Dealer.vue"
+
+const amount = ref(playerChips.value[playerId.value])
+
+watch(playerChips, () => {
+  if (amount.value > playerChips.value[playerId.value]) {
+    amount.value = playerChips.value[playerId.value]
+  } else if (amount.value < playerChips.value[playerId.value]) {
+    setTimeout(() => (amount.value = playerChips.value[playerId.value]), 2200)
+  }
+})
 </script>
 
 <template>
   <div class="main-player">
-    <ChipPile :amount="playerChips[playerId]" class="chips" />
-    <Amount :amount="playerChips[playerId]" class="amount" />
+    <ChipPile :amount="amount" class="chips" />
+    <Amount :amount="amount" class="amount" />
     <Dealer v-if="dealerId === playerId" class="dealer" />
   </div>
 </template>

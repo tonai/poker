@@ -35,7 +35,7 @@ const playerChipsPositions = computed(() => {
   }) as [string, Position][]
   entries.push([
     playerId.value,
-    { left: "calc(var(--size) * 15)", top: "calc(var(--size) * 181)" },
+    { left: "calc(var(--size) * 15)", top: "calc(100% - var(--size) * 19)" },
   ])
   return Object.fromEntries(entries)
 })
