@@ -6,6 +6,7 @@ import { Step } from "../types"
 
 export function startRound(game: GameState) {
   // Start game
+  game.round = 0
   game.blind = startBlind
   game.step = Step.PLAY
   game.dealerIndex = 0
@@ -27,9 +28,10 @@ export function startRound(game: GameState) {
   game.deck = deck
   // Blinds
   game.bets = [
-    { amount: game.blind / 2, id: players[0] },
-    { amount: game.blind, id: players[1] },
+    { amount: game.blind / 2, id: players[0], round: 0, type: "small blind" },
+    { amount: game.blind, id: players[1], round: 0, type: "big blind" },
   ]
   game.playerChips[players[0]] -= game.blind / 2
   game.playerChips[players[1]] -= game.blind
+  game.turnIndex = 2 % players.length
 }

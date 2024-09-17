@@ -1,7 +1,7 @@
 import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
 import { startBlind } from "./constants"
-import { Bet, Cards, PlayerCards, Step } from "./types"
+import { Action, Bet, Cards, PlayerCards, Step } from "./types"
 import { startRound } from "./logic/round"
 
 export interface GameState {
@@ -13,10 +13,13 @@ export interface GameState {
   playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
   playersReady: PlayerId[]
+  round: number
   step: Step
+  turnIndex: number
 }
 
 type GameActions = {
+  action: (action: Action) => void
   ready: () => void
 }
 
@@ -25,7 +28,7 @@ declare global {
 }
 
 Dusk.initLogic({
-  minPlayers: 2,
+  minPlayers: 3,
   maxPlayers: 6,
   setup: (allPlayerIds) => ({
     bets: [],
@@ -36,9 +39,39 @@ Dusk.initLogic({
     playerChips: {},
     playerIds: allPlayerIds,
     playersReady: [],
+    round: 0,
     step: Step.WAIT,
+    turnIndex: 0,
   }),
   actions: {
+    action(action, { game, playerId }) {
+      if (game.step !== Step.PLAY) {
+        return Dusk.invalidAction()
+      }
+      const amount = action.amount ?? 0
+      game.bets.push({
+        amount,
+        id: playerId,
+        round: game.round,
+        type: action.type,
+      })
+      game.playerChips[playerId] -= amount
+      const foldPlayers = game.bets
+        .filter(({ type }) => type === "fold")
+        .map(({ id }) => id)
+      const roundBets = game.bets.filter(
+        ({ id, round }) => round === game.round && !foldPlayers.includes(id)
+      )
+      const playerBets = Object.values(
+        roundBets.reduce<Record<string, number>>((acc, { amount, id }) => {
+          acc[id] = (acc[id] ?? 0) + amount
+          return acc
+        }, {})
+      )
+      if (playerBets.some((total) => total !== playerBets[0])) {
+        game.turnIndex = (game.turnIndex + 1) % game.playerIds.length
+      }
+    },
     ready(_, { game, playerId }) {
       if (game.step !== Step.WAIT) {
         return Dusk.invalidAction()

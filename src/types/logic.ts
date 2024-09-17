@@ -15,4 +15,11 @@ export interface PlayerCards {
 export interface Bet {
   amount: number
   id: PlayerId
+  round: number
+  type: "big blind" | "checkOrCall" | "fold" | "raise" | "small blind"
+}
+
+export interface Action {
+  type: "checkOrCall" | "fold" | "raise"
+  amount?: number
 }

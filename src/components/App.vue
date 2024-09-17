@@ -4,13 +4,16 @@ import { onMounted } from "vue"
 import { Defs } from "../cards"
 import {
   bets,
+  blind,
   dealerIndex,
   playerId,
   playerCards,
   playerChips,
   playerIds,
   playersReady,
+  round,
   step,
+  turnIndex,
 } from "../store"
 import { Step } from "../types"
 
@@ -25,6 +28,9 @@ onMounted(() => {
       }
       if (bets.value !== game.bets) {
         bets.value = game.bets
+      }
+      if (blind.value !== game.blind) {
+        blind.value = game.blind
       }
       if (dealerIndex.value !== game.dealerIndex) {
         dealerIndex.value = game.dealerIndex
@@ -41,8 +47,14 @@ onMounted(() => {
       if (playersReady.value !== game.playersReady) {
         playersReady.value = game.playersReady
       }
+      if (round.value !== game.round) {
+        round.value = game.round
+      }
       if (step.value !== game.step) {
         step.value = game.step
+      }
+      if (turnIndex.value !== game.turnIndex) {
+        turnIndex.value = game.turnIndex
       }
     },
   })

@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -23,4 +24,52 @@ main {
   align-items: center;
   justify-content: space-around;
   overflow: hidden;
+}
+
+.button,
+.input {
+  background: white;
+  border-radius: calc(var(--size) * 2);
+  border: var(--size) solid white;
+  padding: calc(var(--size) * 2) calc(var(--size) * 4);
+  min-width: calc(var(--size) * 25);
+  height: calc(var(--size)* 14);
+  position: relative;
+  font-size: calc(var(--size) * 6);
+  transition: transform 400ms ease;
+  transform: scale(1);
+}
+
+.input {
+  padding: calc(var(--size) * 2) calc(var(--size) * 14) calc(var(--size) * 2) calc(var(--size) * 2);
+}
+
+.button:after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: var(--size);
+  border: 1px solid #44F;
+  border-radius: var(--size);
+}
+
+.button:before {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: var(--size);
+  border-radius: var(--size);
+  opacity: 0.25;
+  transition: background-color 400ms ease;
+  background-color: transparent;
+}
+
+.button.selected,
+.button:active {
+  transform: scale(1.2);
+}
+
+.button.selected:before,
+.button:active:before {
+  background-color: red;
 }

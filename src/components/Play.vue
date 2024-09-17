@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from "vue"
 import { otherPlayers, playerId } from "../store"
 import { Position } from "../types"
 
+import Actions from "./Actions.vue"
 import Deal from "./Deal.vue"
 import MainPlayer from "./MainPlayer.vue"
 import Player from "./Player.vue"
@@ -43,16 +44,24 @@ const showDeal = ref(false)
 onMounted(() => {
   setTimeout(() => (showDeal.value = true), 1000)
 })
+
+const canPlay = ref(false)
 </script>
 
 <template>
   <div class="play">
-    <Deal v-if="showDeal" :player-positions="playerCardPositions" />
+    <Deal
+      v-if="showDeal"
+      :can-play="canPlay"
+      :player-positions="playerCardPositions"
+      @ready="canPlay = true"
+    />
     <Pot :player-positions="playerChipsPositions" />
     <div class="players">
       <Player v-for="id of otherPlayers" :id="id" :key="id" ref="playerRefs" />
     </div>
     <MainPlayer />
+    <Actions v-if="canPlay" />
   </div>
 </template>
 

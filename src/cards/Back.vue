@@ -1,7 +1,7 @@
 <template>
   <defs>
-    <pattern id="bg" width="6" height="6" patternUnits="userSpaceOnUse">
-      <path d="M3 0L6 3L3 6L0 3Z" fill="red"></path>
+    <pattern id="bg" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M4 1L7 4L4 7L1 4Z" fill="red"></path>
     </pattern>
   </defs>
   <rect

@@ -6,4 +6,5 @@ export interface Position {
 export interface CardPosition extends Position {
   rotate?: string
   scale?: number
+  translate?: string
 }

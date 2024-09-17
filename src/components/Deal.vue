@@ -7,12 +7,16 @@ import { playerCards, playerId, playerIds } from "../store"
 import { CardPosition, Position } from "../types"
 
 const props = defineProps<{
+  canPlay: boolean
   playerPositions: Record<string, Position>
 }>()
+
+const emit = defineEmits<{ (e: "ready"): void }>()
 
 const intervalDelay = 500
 const animationDelay = 100
 
+const isRevealed = ref(false)
 const cardPositions = ref<CardPosition[]>(
   createArray(playerIds.value.length * 2, { left: "50%", top: "50%" })
 )
@@ -36,11 +40,28 @@ function animate() {
   }, animationDelay)
 }
 
+function reveal() {
+  let first = true
+  deal.value.forEach(({ id }, index) => {
+    if (id === playerId.value) {
+      cardPositions.value[index].rotate = "0deg"
+      if (first) {
+        cardPositions.value[index].translate = "-120% -10%"
+        first = false
+      } else {
+        cardPositions.value[index].translate = "-15% -10%"
+      }
+    }
+  })
+  setTimeout(() => (isRevealed.value = true), 1000)
+}
+
 onMounted(() => {
   animate()
   const interval = setInterval(() => {
     if (animateIndex.value === deal.value.length) {
       clearInterval(interval)
+      emit("ready")
     } else {
       animateIndex.value++
       animate()
@@ -51,14 +72,15 @@ onMounted(() => {
 
 <template>
   <Card
-    v-for="({ card }, index) of animatedDeal"
+    v-for="({ card, id }, index) of animatedDeal"
     :key="`${card.rank}${card.suit}`"
     class="card"
-    flipped
+    :flipped="id !== playerId || !isRevealed"
     :rank="card.rank"
     :suit="card.suit"
     :style="cardPositions[index]"
   />
+  <button v-if="canPlay" type="button" class="reveal" @click="reveal"></button>
 </template>
 
 <style scoped>
@@ -67,5 +89,16 @@ onMounted(() => {
   translate: -50% 0;
   width: calc(var(--size) * 20);
   transition: all 1000ms cubic-bezier(0.28, 0.8, 0.5, 0.95);
+}
+.reveal {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  width: calc(var(--size) * 34);
+  height: calc(var(--size) * 38);
+  translate: -50% -12.5%;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 </style>
