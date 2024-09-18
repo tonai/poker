@@ -1,10 +1,11 @@
 import { computed, ref } from "vue"
 
 import { startBlind } from "../constants"
-import { Bet, PlayerCards, Step } from "../types"
+import { Bet, Cards, PlayerCards, Step } from "../types"
 
 export const bets = ref<Bet[]>([])
 export const blind = ref(startBlind)
+export const communityCards = ref<Cards>([])
 export const dealerIndex = ref(0)
 export const hand = ref(0)
 export const playerId = ref("")
@@ -45,5 +46,5 @@ export const playerBets = computed(() =>
   }, {})
 )
 export const maxRoundBet = computed(() =>
-  Math.max(...Object.values(playerBets.value))
+  Math.max(...Object.values(playerBets.value), 0)
 )

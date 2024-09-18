@@ -4,17 +4,21 @@ import { createArray, randomInt } from "@tonai/game-utils"
 
 import { Card } from "../cards"
 import {
+  communityCards,
+  dealerId,
   foldPlayers,
   playerCards,
   playerId,
   playerIds,
+  round,
   roundWinners,
 } from "../store"
-import { CardPosition, Position } from "../types"
+import { CardPosition, CommunityCardPosition, Position } from "../types"
 
 const props = defineProps<{
   canPlay: boolean
   playerPositions: Record<string, Position>
+  playerCardPositions: Record<string, Position>
 }>()
 
 const emit = defineEmits<{ (e: "ready"): void }>()
@@ -22,69 +26,71 @@ const emit = defineEmits<{ (e: "ready"): void }>()
 const intervalDelay = 500
 const animationDelay = 100
 
-const isRevealed = ref(false)
-const cardPositions = ref<CardPosition[]>(
-  createArray(playerIds.value.length * 2, { left: "50%", top: "50%" })
+// Deal cards
+const dealCardPositions = ref<CardPosition[]>(
+  createArray(playerIds.value.length * 2, {
+    ...props.playerPositions[dealerId.value],
+  })
 )
-
 const deal = computed(() =>
   playerCards.value
     .map(({ cards, id }) => ({ id, card: cards[0] }))
     .concat(playerCards.value.map(({ cards, id }) => ({ id, card: cards[1] })))
 )
-const animateIndex = ref(1)
-const animatedDeal = computed(() => deal.value.slice(0, animateIndex.value))
-
-function animate() {
+const dealIndex = ref(1)
+const animatedDeal = computed(() => deal.value.slice(0, dealIndex.value))
+function animateDeal() {
   setTimeout(() => {
-    const cardPlayerId = deal.value[animateIndex.value - 1].id
-    cardPositions.value[animateIndex.value - 1] = {
-      ...props.playerPositions[cardPlayerId],
+    const cardPlayerId = deal.value[dealIndex.value - 1].id
+    dealCardPositions.value[dealIndex.value - 1] = {
+      ...props.playerCardPositions[cardPlayerId],
       rotate: `${randomInt(360, -360)}deg`,
       scale: cardPlayerId === playerId.value ? 1 : 0.65,
     }
   }, animationDelay)
 }
+onMounted(() => {
+  animateDeal()
+  const interval = setInterval(() => {
+    if (dealIndex.value === deal.value.length) {
+      clearInterval(interval)
+      emit("ready")
+    } else {
+      dealIndex.value++
+      animateDeal()
+    }
+  }, intervalDelay)
+})
 
+// Reveal your cards
+const isRevealed = ref(false)
 function reveal() {
   let first = true
   deal.value.forEach(({ id }, index) => {
     if (id === playerId.value) {
-      cardPositions.value[index].rotate = "0deg"
+      dealCardPositions.value[index].rotate = "0deg"
       if (first) {
-        cardPositions.value[index].translate = "-100% -10%"
+        dealCardPositions.value[index].translate = "-100% -10%"
         first = false
       } else {
-        cardPositions.value[index].translate = "5% -10%"
+        dealCardPositions.value[index].translate = "5% -10%"
       }
     }
   })
   setTimeout(() => (isRevealed.value = true), 1000)
 }
 
-onMounted(() => {
-  animate()
-  const interval = setInterval(() => {
-    if (animateIndex.value === deal.value.length) {
-      clearInterval(interval)
-      emit("ready")
-    } else {
-      animateIndex.value++
-      animate()
-    }
-  }, intervalDelay)
-})
-
+// Discard
 const discardIds = ref<string[]>([])
 function discard(id: string) {
   if (!discardIds.value.includes(id)) {
     discardIds.value.push(id)
     deal.value.forEach((card, index) => {
       if (card.id === id) {
-        cardPositions.value[index].translate = "-50% 0"
-        cardPositions.value[index].left = "calc(100% - var(--size) * 20)"
-        cardPositions.value[index].top = "calc(100% - var(--size) * 40)"
-        cardPositions.value[index].scale = 0.65
+        dealCardPositions.value[index].translate = "-50% 0"
+        dealCardPositions.value[index].left = "calc(100% - var(--size) * 20)"
+        dealCardPositions.value[index].top = "calc(100% - var(--size) * 40)"
+        dealCardPositions.value[index].scale = 0.65
       }
     })
   }
@@ -104,6 +110,37 @@ watch(roundWinners, () => {
     discard(id)
   }
 })
+
+// Flop, Turn, River
+const communityCardPositions = ref<CommunityCardPosition[]>(
+  createArray(5, { ...props.playerPositions[dealerId.value], flipped: true })
+)
+const communityCardsIndex = ref(1)
+const animatedCommunityCards = computed(() =>
+  communityCards.value.slice(0, communityCardsIndex.value)
+)
+function animateCommunityCards() {
+  setTimeout(() => {
+    // const cardPlayerId = deal.value[dealIndex.value - 1].id
+    communityCardPositions.value[communityCardsIndex.value - 1] = {
+      flipped: false,
+      left: `${(100 / 5) * (communityCardsIndex.value - 1) + 10}%`,
+      top: "50%",
+    }
+  }, animationDelay)
+}
+watch(round, () => {
+  animateCommunityCards()
+  const interval = setInterval(() => {
+    if (communityCardsIndex.value === communityCards.value.length) {
+      clearInterval(interval)
+      emit("ready")
+    } else {
+      communityCardsIndex.value++
+      animateCommunityCards()
+    }
+  }, intervalDelay)
+})
 </script>
 
 <template>
@@ -118,7 +155,16 @@ watch(roundWinners, () => {
     :flipped="id !== playerId || !isRevealed || discardIds.includes(id)"
     :rank="card.rank"
     :suit="card.suit"
-    :style="cardPositions[index]"
+    :style="dealCardPositions[index]"
+  />
+  <Card
+    v-for="(card, index) of animatedCommunityCards"
+    :key="`${card.rank}${card.suit}`"
+    class="card"
+    :flipped="communityCardPositions[index].flipped"
+    :rank="card.rank"
+    :suit="card.suit"
+    :style="communityCardPositions[index]"
   />
   <button
     v-if="canPlay && !isRevealed"

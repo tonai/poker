@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 
-import { otherPlayers, playerId, playerTurn } from "../store"
+import { otherPlayers, playerId, playerTurn, round } from "../store"
 import { Position } from "../types"
 
 import Actions from "./Actions.vue"
@@ -16,6 +16,16 @@ const boundings = computed(() =>
     .filter((ref) => ref.ref)
     .map((ref) => ref.ref!.getBoundingClientRect())
 )
+const playerPositions = computed(() => {
+  const entries = boundings.value.map(({ left, top, width }, index) => {
+    return [
+      otherPlayers.value[index],
+      { left: `${left + width / 2}px`, top: `${top}px` },
+    ]
+  }) as [string, Position][]
+  entries.push([playerId.value, { left: "15%", top: "70%" }])
+  return Object.fromEntries(entries)
+})
 const playerCardPositions = computed(() => {
   const entries = boundings.value.map(({ height, left, top, width }, index) => {
     return [
@@ -46,6 +56,7 @@ onMounted(() => {
 })
 
 const canPlay = ref(false)
+watch(round, () => (canPlay.value = false))
 </script>
 
 <template>
@@ -53,7 +64,8 @@ const canPlay = ref(false)
     <Deal
       v-if="showDeal"
       :can-play="canPlay"
-      :player-positions="playerCardPositions"
+      :player-positions="playerPositions"
+      :player-card-positions="playerCardPositions"
       @ready="canPlay = true"
     />
     <Pot :player-positions="playerChipsPositions" />

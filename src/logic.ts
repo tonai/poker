@@ -2,11 +2,12 @@ import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
 import { startBlind } from "./constants"
 import { Action, Bet, Cards, PlayerCards, Step } from "./types"
-import { endGame, startGame } from "./logic/round"
+import { endGame, nextRound, startGame } from "./logic/round"
 
 export interface GameState {
   bets: Bet[]
   blind: number
+  communityCards: Cards
   dealerIndex: number
   deck: Cards
   hand: number
@@ -35,6 +36,7 @@ Dusk.initLogic({
   setup: (allPlayerIds) => ({
     bets: [],
     blind: startBlind,
+    communityCards: [],
     dealerIndex: -1,
     deck: [],
     hand: -1,
@@ -81,12 +83,15 @@ Dusk.initLogic({
           return acc
         }, {})
       )
-      if (playerBets.some((total) => total !== playerBets[0])) {
+      if (
+        roundBets.length < game.playerIds.length ||
+        playerBets.some((total) => total !== playerBets[0])
+      ) {
         // Continue betting round
         game.turnIndex = (game.turnIndex + 1) % game.playerIds.length
       } else {
         // Start next round
-        game.turnIndex = -1
+        nextRound(game)
       }
     },
     ready(_, { game, playerId }) {

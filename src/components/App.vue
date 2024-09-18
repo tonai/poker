@@ -5,6 +5,7 @@ import { Defs } from "../cards"
 import {
   bets,
   blind,
+  communityCards,
   dealerIndex,
   hand,
   playerId,
@@ -33,6 +34,9 @@ onMounted(() => {
       }
       if (blind.value !== game.blind) {
         blind.value = game.blind
+      }
+      if (communityCards.value !== game.communityCards) {
+        communityCards.value = game.communityCards
       }
       if (dealerIndex.value !== game.dealerIndex) {
         dealerIndex.value = game.dealerIndex

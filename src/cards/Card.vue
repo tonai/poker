@@ -4,11 +4,16 @@ import { Rank, Suit } from "../types"
 import CardBack from "./CardBack.vue"
 import CardFront from "./CardFront.vue"
 
-defineProps<{
-  flipped: boolean
-  rank: Rank
-  suit: Suit
-}>()
+withDefaults(
+  defineProps<{
+    flipped?: boolean
+    rank: Rank
+    suit: Suit
+  }>(),
+  {
+    flipped: false,
+  }
+)
 </script>
 
 <template>

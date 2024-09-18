@@ -64,3 +64,21 @@ export function endGame(game: GameState, winners: Record<string, number>) {
     game.playerChips[id] += amount
   }
 }
+
+export function nextRound(game: GameState) {
+  game.round++
+  game.turnIndex = 0
+  // Burn card
+  game.deck.shift()
+  if (game.round === 1) {
+    // Flop
+    game.communityCards = [
+      game.deck.shift()!,
+      game.deck.shift()!,
+      game.deck.shift()!,
+    ]
+  } else {
+    // Turn and River
+    game.communityCards.push(game.deck.shift()!)
+  }
+}
