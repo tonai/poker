@@ -36,7 +36,7 @@ function confirm() {
   if (action.value) {
     if (action.value === "checkOrCall") {
       Dusk.actions.action({
-        type: action.value,
+        type: checkOrCallBet.value === 0 ? "check" : "call",
         amount: checkOrCallBet.value,
       })
     } else if (action.value === "raise") {
@@ -103,7 +103,9 @@ function confirm() {
         class="checkOrCall"
         :amount="checkOrCallBet"
       />
-      <button type="button" class="button" @click="confirm">Confirm</button>
+      <button type="button" class="button confirm" @click="confirm">
+        Confirm
+      </button>
     </div>
   </div>
 </template>
@@ -144,11 +146,7 @@ function confirm() {
   font-size: calc(var(--size) * 8);
   flex: 1;
 }
-/* .action {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(var(--size) * 10);
-} */
+.confirm {
+  margin-left: auto;
+}
 </style>

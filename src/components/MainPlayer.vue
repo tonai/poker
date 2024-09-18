@@ -7,8 +7,8 @@ import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
 import Dealer from "./Dealer.vue"
 
+// Amount sync with bet transitions
 const amount = ref(playerChips.value[playerId.value])
-
 watch(playerChips, () => {
   if (amount.value > playerChips.value[playerId.value]) {
     amount.value = playerChips.value[playerId.value]

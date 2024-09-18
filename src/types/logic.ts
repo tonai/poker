@@ -18,11 +18,11 @@ export interface Bet {
   id: PlayerId
   raise: number
   round: number
-  type: "big blind" | "checkOrCall" | "fold" | "raise" | "small blind"
+  type: "big blind" | "call" | "check" | "fold" | "raise" | "small blind"
 }
 
 export interface Action {
-  type: "checkOrCall" | "fold" | "raise"
+  type: "call" | "check" | "fold" | "raise"
   amount: number
   raise?: number
 }

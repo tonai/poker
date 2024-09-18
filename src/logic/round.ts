@@ -77,8 +77,10 @@ export function nextRound(game: GameState) {
       game.deck.shift()!,
       game.deck.shift()!,
     ]
-  } else {
+  } else if (game.round === 2 || game.round === 3) {
     // Turn and River
     game.communityCards.push(game.deck.shift()!)
+  } else if (game.round === 4) {
+    // Showdown
   }
 }

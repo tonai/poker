@@ -31,7 +31,7 @@ declare global {
 }
 
 Dusk.initLogic({
-  minPlayers: 3,
+  minPlayers: 6,
   maxPlayers: 6,
   setup: (allPlayerIds) => ({
     bets: [],
