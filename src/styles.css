@@ -27,7 +27,7 @@ main {
 }
 
 .button,
-.input {
+.field {
   background: white;
   border-radius: calc(var(--size) * 2);
   border: var(--size) solid white;
@@ -40,8 +40,21 @@ main {
   transform: scale(1);
 }
 
+.field {
+  padding: calc(var(--size) * 2);
+  display: flex;
+  align-items: center;
+  font-size: calc(var(--size)* 8);
+  white-space: nowrap;
+}
+
 .input {
-  padding: calc(var(--size) * 2) calc(var(--size) * 14) calc(var(--size) * 2) calc(var(--size) * 2);
+  border: 0;
+  padding: 0 calc(var(--size) * 10) 0 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  font-size: calc(var(--size)* 8);
 }
 
 .button:after {

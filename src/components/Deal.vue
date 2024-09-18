@@ -120,7 +120,12 @@ watch(roundWinners, () => {
     :suit="card.suit"
     :style="cardPositions[index]"
   />
-  <button v-if="canPlay" type="button" class="reveal" @click="reveal"></button>
+  <button
+    v-if="canPlay && !isRevealed"
+    type="button"
+    class="reveal"
+    @click="reveal"
+  ></button>
 </template>
 
 <style scoped>

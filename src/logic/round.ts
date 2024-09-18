@@ -4,7 +4,7 @@ import { initialDeck, startBlind, startPlayerAmount } from "../constants"
 import { GameState } from "../logic"
 import { Step } from "../types"
 
-export function startRound(game: GameState) {
+export function startGame(game: GameState) {
   // Start game
   game.step = Step.PLAY
   game.hand = -1
@@ -12,15 +12,15 @@ export function startRound(game: GameState) {
   game.playerChips = Object.fromEntries(
     game.playerIds.map((id) => [id, startPlayerAmount])
   )
-  nextRound(game)
+  nextGame(game)
 }
 
-export function nextRound(game: GameState) {
+export function nextGame(game: GameState) {
   game.hand++
   // Start round
   game.round = 0
   game.blind = startBlind
-  game.dealerIndex = game.dealerIndex % game.playerIds.length
+  game.dealerIndex = (game.dealerIndex + 1) % game.playerIds.length
   // Shuffle deck and deal 2 cards per players
   const deck = [...initialDeck]
   shuffleArray(deck)
@@ -36,15 +36,27 @@ export function nextRound(game: GameState) {
   game.deck = deck
   // Blinds
   game.bets = [
-    { amount: game.blind / 2, id: players[0], round: 0, type: "small blind" },
-    { amount: game.blind, id: players[1], round: 0, type: "big blind" },
+    {
+      amount: game.blind / 2,
+      id: players[0],
+      raise: 0,
+      round: 0,
+      type: "small blind",
+    },
+    {
+      amount: game.blind,
+      id: players[1],
+      raise: 0,
+      round: 0,
+      type: "big blind",
+    },
   ]
   game.playerChips[players[0]] -= game.blind / 2
   game.playerChips[players[1]] -= game.blind
   game.turnIndex = 2 % game.playerIds.length
 }
 
-export function endRound(game: GameState, winners: Record<string, number>) {
+export function endGame(game: GameState, winners: Record<string, number>) {
   game.turnIndex = -1
   game.roundWinners = winners
   game.step = Step.ROUND_END

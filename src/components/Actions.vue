@@ -2,22 +2,27 @@
 import { computed, ref } from "vue"
 
 import {
+  blind,
   maxRoundBet,
   playerChips,
   playerId,
   playerBets,
-  playerTurn,
+  roundBets,
 } from "../store"
 
 import Amount from "./Amount.vue"
 import Chip from "./Chip.vue"
 
-const minBet = computed(
+const checkOrCallBet = computed(
   () => maxRoundBet.value - (playerBets.value[playerId.value] ?? 0)
+)
+const minRaise = computed(
+  () =>
+    roundBets.value.find(({ type }) => type === "raise")?.raise ?? blind.value
 )
 
 const action = ref<"checkOrCall" | "fold" | "raise">()
-const raiseValue = ref(minBet.value)
+const raiseValue = ref(minRaise.value)
 
 function select(type: "checkOrCall" | "fold" | "raise") {
   if (action.value === type) {
@@ -29,23 +34,30 @@ function select(type: "checkOrCall" | "fold" | "raise") {
 
 function confirm() {
   if (action.value) {
-    let amount = 0
     if (action.value === "checkOrCall") {
-      amount = minBet.value
+      Dusk.actions.action({
+        type: action.value,
+        amount: checkOrCallBet.value,
+      })
     } else if (action.value === "raise") {
-      amount = raiseValue.value
+      Dusk.actions.action({
+        type: action.value,
+        amount: raiseValue.value + checkOrCallBet.value,
+        raise: raiseValue.value,
+      })
+    } else {
+      Dusk.actions.action({
+        type: action.value,
+        amount: 0,
+      })
     }
-    Dusk.actions.action({
-      type: action.value,
-      amount,
-    })
     action.value = undefined
   }
 }
 </script>
 
 <template>
-  <div v-if="playerTurn === playerId" class="actions">
+  <div class="actions">
     <div class="buttons">
       <button
         type="button"
@@ -53,7 +65,7 @@ function confirm() {
         :class="{ selected: action === 'checkOrCall' }"
         @click="select('checkOrCall')"
       >
-        {{ minBet === 0 ? "Check" : "Call" }}
+        {{ checkOrCallBet === 0 ? "Check" : "Call" }}
       </button>
       <button
         type="button"
@@ -73,20 +85,24 @@ function confirm() {
       </button>
     </div>
     <div v-if="action" class="details">
-      <div class="action">
-        <div v-if="action === 'raise'" class="wrapper">
-          <input
-            v-model="raiseValue"
-            class="input"
-            type="number"
-            step="1"
-            :min="minBet"
-            :max="playerChips[playerId]"
-          />
-          <Chip class="chip" />
-        </div>
-        <Amount v-if="action === 'checkOrCall'" :amount="minBet" />
+      <div v-if="action === 'raise'" class="field">
+        <label for="raise">{{ checkOrCallBet }} +&nbsp;</label>
+        <input
+          id="raise"
+          v-model="raiseValue"
+          class="input"
+          type="number"
+          step="1"
+          :min="minRaise"
+          :max="playerChips[playerId] - checkOrCallBet"
+        />
+        <Chip class="chip" />
       </div>
+      <Amount
+        v-if="action === 'checkOrCall'"
+        class="checkOrCall"
+        :amount="checkOrCallBet"
+      />
       <button type="button" class="button" @click="confirm">Confirm</button>
     </div>
   </div>
@@ -114,8 +130,8 @@ function confirm() {
   flex: 1;
   position: relative;
 }
-.input {
-  width: 100%;
+.field {
+  flex: 1;
 }
 .chip {
   position: absolute;
@@ -124,11 +140,15 @@ function confirm() {
   top: 50%;
   translate: 0 -50%;
 }
-.action {
+.checkOrCall {
+  font-size: calc(var(--size) * 8);
+  flex: 1;
+}
+/* .action {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: calc(var(--size) * 10);
-}
+} */
 </style>

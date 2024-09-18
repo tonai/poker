@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
 
-import { otherPlayers, playerId } from "../store"
+import { otherPlayers, playerId, playerTurn } from "../store"
 import { Position } from "../types"
 
 import Actions from "./Actions.vue"
@@ -61,7 +61,7 @@ const canPlay = ref(false)
       <Player v-for="id of otherPlayers" :id="id" :key="id" ref="playerRefs" />
     </div>
     <MainPlayer />
-    <Actions v-if="canPlay" />
+    <Actions v-if="canPlay && playerTurn === playerId" />
   </div>
 </template>
 

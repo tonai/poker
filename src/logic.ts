@@ -2,7 +2,7 @@ import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
 import { startBlind } from "./constants"
 import { Action, Bet, Cards, PlayerCards, Step } from "./types"
-import { endRound, startRound } from "./logic/round"
+import { endGame, startGame } from "./logic/round"
 
 export interface GameState {
   bets: Bet[]
@@ -52,23 +52,23 @@ Dusk.initLogic({
       if (game.step !== Step.PLAY) {
         return Dusk.invalidAction()
       }
-      const amount = action.amount ?? 0
       game.bets.push({
-        amount,
+        amount: action.amount,
         id: playerId,
+        raise: action.raise ?? 0,
         round: game.round,
         type: action.type,
       })
-      game.playerChips[playerId] -= amount
+      game.playerChips[playerId] -= action.amount
       const foldPlayers = game.bets
         .filter(({ type }) => type === "fold")
         .map(({ id }) => id)
-      // Everybody fold
       if (foldPlayers.length === game.playerIds.length - 1) {
+        // Everybody fold
         const winner = game.playerIds.find((id) => !foldPlayers.includes(id))
         if (winner) {
           const total = game.bets.reduce((acc, { amount }) => acc + amount, 0)
-          endRound(game, { [winner]: total })
+          endGame(game, { [winner]: total })
         }
         return
       }
@@ -82,14 +82,18 @@ Dusk.initLogic({
         }, {})
       )
       if (playerBets.some((total) => total !== playerBets[0])) {
+        // Continue betting round
         game.turnIndex = (game.turnIndex + 1) % game.playerIds.length
+      } else {
+        // Start next round
+        game.turnIndex = -1
       }
     },
     ready(_, { game, playerId }) {
       if (game.step !== Step.WAIT) {
         return Dusk.invalidAction()
       }
-      startRound(game)
+      startGame(game)
       /*const index = game.playersReady.indexOf(playerId)
       if (index !== -1) {
         game.playersReady.splice(index, 1)
