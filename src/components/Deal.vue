@@ -103,14 +103,6 @@ watch(foldPlayers, () => {
   }
 })
 
-// End round
-watch(roundWinners, () => {
-  const ids = Object.keys(roundWinners.value)
-  for (const id of ids) {
-    discard(id)
-  }
-})
-
 // Flop, Turn, River
 const communityCardPositions = ref<CommunityCardPosition[]>(
   createArray(5, { ...props.playerPositions[dealerId.value], flipped: true })
@@ -140,6 +132,20 @@ watch(round, () => {
       animateCommunityCards()
     }
   }, intervalDelay)
+})
+
+// End round
+watch(roundWinners, () => {
+  const ids = Object.keys(roundWinners.value)
+  for (const id of ids) {
+    discard(id)
+  }
+  communityCardPositions.value.forEach((position) => {
+    position.flipped = true
+    position.left = "calc(100% - var(--size) * 20)"
+    position.top = "calc(100% - var(--size) * 40)"
+    position.scale = 0.65
+  })
 })
 </script>
 

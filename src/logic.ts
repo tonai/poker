@@ -74,21 +74,30 @@ Dusk.initLogic({
         }
         return
       }
-      const roundBets = game.bets.filter(
-        ({ id, round }) => round === game.round && !foldPlayers.includes(id)
+      const roundBets = game.bets.filter(({ round }) => round === game.round)
+      const nonFoldBets = roundBets.filter(
+        ({ id }) => !foldPlayers.includes(id)
       )
       const playerBets = Object.values(
-        roundBets.reduce<Record<string, number>>((acc, { amount, id }) => {
+        nonFoldBets.reduce<Record<string, number>>((acc, { amount, id }) => {
           acc[id] = (acc[id] ?? 0) + amount
           return acc
         }, {})
       )
+      const roundFoldPlayers = roundBets
+        .filter(({ type }) => type === "fold")
+        .map(({ id }) => id)
+      const playersIn = game.playerIds.length - foldPlayers.length
       if (
-        roundBets.length < game.playerIds.length ||
+        (game.round === 0 && roundBets.length < game.playerIds.length + 2) ||
+        roundBets.length < playersIn + roundFoldPlayers.length ||
         playerBets.some((total) => total !== playerBets[0])
       ) {
         // Continue betting round
-        game.turnIndex = (game.turnIndex + 1) % game.playerIds.length
+        if (action.type !== "fold") {
+          game.turnIndex++
+        }
+        game.turnIndex = game.turnIndex % playersIn
       } else {
         // Start next round
         nextRound(game)

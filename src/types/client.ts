@@ -15,4 +15,5 @@ export interface CardPosition extends Position {
 
 export interface CommunityCardPosition extends Position {
   flipped: boolean
+  scale?: number
 }
