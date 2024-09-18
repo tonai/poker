@@ -1,8 +1,8 @@
 import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
 import { startBlind } from "./constants"
-import { Action, Bet, Cards, PlayerCards, Step } from "./types"
-import { endGame, nextRound, startGame } from "./logic/round"
+import { Action, Bet, Cards, PlayerCards, Step, WinnerHand } from "./types"
+import { endGame, nextRound, startGame, winRound } from "./logic/round"
 
 export interface GameState {
   bets: Bet[]
@@ -19,10 +19,12 @@ export interface GameState {
   roundWinners: Record<PlayerId, number>
   step: Step
   turnIndex: number
+  winnerHands: WinnerHand[]
 }
 
 type GameActions = {
   action: (action: Action) => void
+  nextRound: () => void
   ready: () => void
 }
 
@@ -31,7 +33,7 @@ declare global {
 }
 
 Dusk.initLogic({
-  minPlayers: 6,
+  minPlayers: 3,
   maxPlayers: 6,
   setup: (allPlayerIds) => ({
     bets: [],
@@ -48,6 +50,7 @@ Dusk.initLogic({
     roundWinners: {},
     step: Step.WAIT,
     turnIndex: 0,
+    winnerHands: [],
   }),
   actions: {
     action(action, { game, playerId }) {
@@ -70,7 +73,7 @@ Dusk.initLogic({
         const winner = game.playerIds.find((id) => !foldPlayers.includes(id))
         if (winner) {
           const total = game.bets.reduce((acc, { amount }) => acc + amount, 0)
-          endGame(game, { [winner]: total })
+          winRound(game, { [winner]: total })
         }
         return
       }
@@ -100,7 +103,21 @@ Dusk.initLogic({
         game.turnIndex = game.turnIndex % playersIn
       } else {
         // Start next round
-        nextRound(game)
+        nextRound(game, foldPlayers)
+      }
+    },
+    nextRound(_, { game, playerId }) {
+      if (game.step !== Step.WIN) {
+        return Dusk.invalidAction()
+      }
+      const index = game.playersReady.indexOf(playerId)
+      if (index !== -1) {
+        game.playersReady.splice(index, 1)
+      } else {
+        game.playersReady.push(playerId)
+        if (game.playersReady.length === game.playerIds.length) {
+          endGame(game)
+        }
       }
     },
     ready(_, { game, playerId }) {

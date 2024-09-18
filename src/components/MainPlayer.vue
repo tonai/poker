@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 
-import { dealerId, playerChips, playerId } from "../store"
+import { dealerId, playerChips, playerId, winners } from "../store"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
@@ -23,6 +23,16 @@ watch(playerChips, () => {
     <ChipPile :amount="amount" class="chips" />
     <Amount :amount="amount" class="amount" />
     <Dealer v-if="dealerId === playerId" class="dealer" />
+    <div
+      v-if="winners.length > 0"
+      class="result"
+      :class="{
+        winner: winners.includes(playerId),
+        loser: !winners.includes(playerId),
+      }"
+    >
+      {{ winners.includes(playerId) ? "Win" : "Lost" }}
+    </div>
   </div>
 </template>
 
@@ -44,5 +54,30 @@ watch(playerChips, () => {
 }
 .dealer {
   translate: 50% 0;
+}
+.result {
+  position: absolute;
+  bottom: calc(var(--size) * 29);
+  width: calc(var(--size) * 20);
+  text-align: center;
+  font-size: calc(var(--size) * 7);
+  font-weight: bold;
+  background-color: white;
+  border-radius: var(--size);
+  animation: 400ms ease both slide;
+}
+@keyframes slide {
+  0% {
+    translate: -150% 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+.winner {
+  color: green;
+}
+.loser {
+  color: red;
 }
 </style>

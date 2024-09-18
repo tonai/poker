@@ -1,4 +1,5 @@
 import {
+  Cards,
   Combination,
   Hand,
   HandCategory,
@@ -46,6 +47,10 @@ export function getSortedRank(rank: Rank): SortedRank {
     default:
       return rank
   }
+}
+
+export function getSortedCards(cards: Cards): SortedCards {
+  return cards.map((card) => ({ ...card, rank: getSortedRank(card.rank) }))
 }
 
 function isHand(hand: Hand | Combination): hand is Hand {

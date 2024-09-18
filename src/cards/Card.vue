@@ -39,5 +39,8 @@ withDefaults(
 }
 .back {
   translate: 0 0 -1px;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transform: rotateY(180deg);
 }
 </style>

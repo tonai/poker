@@ -17,6 +17,7 @@ import {
   roundWinners,
   step,
   turnIndex,
+  winnerHands,
 } from "../store"
 import { Step } from "../types"
 
@@ -68,6 +69,9 @@ onMounted(() => {
       if (turnIndex.value !== game.turnIndex) {
         turnIndex.value = game.turnIndex
       }
+      if (winnerHands.value !== game.winnerHands) {
+        winnerHands.value = game.winnerHands
+      }
     },
   })
 })
@@ -76,7 +80,10 @@ onMounted(() => {
 <template>
   <Defs />
   <StartScreen v-if="step === Step.WAIT" />
-  <Play v-if="step === Step.PLAY || step === Step.ROUND_END" :key="hand" />
+  <Play
+    v-if="step === Step.PLAY || step === Step.ROUND_END || step === Step.WIN"
+    :key="hand"
+  />
 </template>
 
 <style scoped>

@@ -1,11 +1,12 @@
 import type { PlayerId } from "dusk-games-sdk/multiplayer"
 
-import { Cards } from "./card"
+import { Cards, Hand } from "./card"
 
 export enum Step {
   PLAY,
   ROUND_END,
   WAIT,
+  WIN,
 }
 
 export interface PlayerCards {
@@ -25,4 +26,9 @@ export interface Action {
   type: "call" | "check" | "fold" | "raise"
   amount: number
   raise?: number
+}
+
+export interface WinnerHand {
+  hand: Hand
+  id: string
 }

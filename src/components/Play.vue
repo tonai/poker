@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
 
-import { otherPlayers, playerId, playerTurn, round } from "../store"
-import { Position } from "../types"
+import { otherPlayers, playerId, playerTurn, round, step, winners } from "../store"
+import { Position, Step } from "../types"
 
 import Actions from "./Actions.vue"
 import Deal from "./Deal.vue"
 import MainPlayer from "./MainPlayer.vue"
+import NextRound from "./NextRound.vue"
 import Player from "./Player.vue"
 import Pot from "./Pot.vue"
 
@@ -74,6 +75,7 @@ watch(round, () => (canPlay.value = false))
     </div>
     <MainPlayer />
     <Actions v-if="canPlay && playerTurn === playerId" />
+    <NextRound v-if="step === Step.WIN" />
   </div>
 </template>
 

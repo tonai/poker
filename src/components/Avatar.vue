@@ -7,6 +7,7 @@ import { dealerId } from "../store"
 import Dealer from "./Dealer.vue"
 
 const props = defineProps<{
+  dealer?: boolean
   id?: PlayerId
   name?: boolean
   player?: Player
@@ -22,7 +23,7 @@ const player = computed(
     <div v-if="name" class="name">{{ player.displayName }}</div>
     <div class="wrapper">
       <img class="image" :src="player.avatarUrl" />
-      <Dealer v-if="dealerId === id" class="dealer" />
+      <Dealer v-if="dealer && dealerId === id" class="dealer" />
     </div>
   </div>
 </template>

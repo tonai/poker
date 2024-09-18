@@ -5,6 +5,9 @@
 
 :root {
   --size: min(1vw, 0.5vh);
+  --left: calc(100% - var(--size) * 20);
+  --top: calc(100% - var(--size) * 25);
+  --top2: calc(100% - var(--size) * 40);
 }
 
 body,

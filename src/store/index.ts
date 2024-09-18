@@ -1,7 +1,8 @@
 import { computed, ref } from "vue"
 
 import { startBlind } from "../constants"
-import { Bet, Cards, PlayerCards, Step } from "../types"
+import { getRank } from "../helpers"
+import { Bet, Cards, PlayerCards, Step, WinnerHand } from "../types"
 
 export const bets = ref<Bet[]>([])
 export const blind = ref(startBlind)
@@ -17,6 +18,7 @@ export const round = ref(0)
 export const roundWinners = ref<Record<string, number>>({})
 export const step = ref<Step>(Step.WAIT)
 export const turnIndex = ref(0)
+export const winnerHands = ref<WinnerHand[]>([])
 
 export const foldPlayers = computed(() =>
   bets.value.filter(({ type }) => type === "fold").map(({ id }) => id)
@@ -51,3 +53,12 @@ export const playerBets = computed(() =>
 export const maxRoundBet = computed(() =>
   Math.max(...Object.values(playerBets.value), 0)
 )
+export const winners = computed(() => Object.keys(roundWinners.value))
+export const winnerCards = computed(() => [
+  ...new Set(
+    winnerHands.value
+      .map(({ hand }) => hand.cards)
+      .flat()
+      .map((card) => `${getRank(card.rank)}${card.suit}`)
+  ),
+])

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue"
 
-import { bets, roundWinners } from "../store"
+import { bets, blind, roundWinners } from "../store"
 import { PilePosition, Position } from "../types"
 
 import Amount from "./Amount.vue"
@@ -12,8 +12,8 @@ const props = defineProps<{
 }>()
 
 const position = {
-  left: "calc(100% - var(--size) * 20)",
-  top: "calc(100% - var(--size) * 25)",
+  left: "var(--left)",
+  top: "var(--top)",
 }
 
 const betPositions = ref<PilePosition[]>([])
@@ -65,7 +65,7 @@ watch(roundWinners, () => {
 
 <template>
   <div class="pot">
-    <div class="title">Pot</div>
+    <div class="title">Blind {{ blind }}</div>
     <Amount :amount="total" class="amount" />
   </div>
   <ChipPile
@@ -105,17 +105,17 @@ watch(roundWinners, () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   color: white;
   padding: calc(var(--size) * 2) 0;
 }
 .title {
-  font-size: calc(var(--size) * 7);
+  font-size: calc(var(--size) * 6);
 }
 .pot .total-pile {
   position: fixed;
 }
 .pot .amount {
+  margin-top: auto;
   font-size: calc(var(--size) * 7);
 }
 </style>

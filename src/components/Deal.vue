@@ -10,10 +10,12 @@ import {
   playerCards,
   playerId,
   playerIds,
+  playerOrder,
   round,
-  roundWinners,
+  step,
+  winnerCards,
 } from "../store"
-import { CardPosition, CommunityCardPosition, Position } from "../types"
+import { CardPosition, CommunityCardPosition, Position, Step } from "../types"
 
 const props = defineProps<{
   canPlay: boolean
@@ -45,7 +47,7 @@ function animateDeal() {
     dealCardPositions.value[dealIndex.value - 1] = {
       ...props.playerCardPositions[cardPlayerId],
       rotate: `${randomInt(360, -360)}deg`,
-      scale: cardPlayerId === playerId.value ? 1 : 0.65,
+      scale: cardPlayerId === playerId.value ? 1 : 0.5,
     }
   }, animationDelay)
 }
@@ -62,22 +64,24 @@ onMounted(() => {
   }, intervalDelay)
 })
 
-// Reveal your cards
-const isRevealed = ref(false)
-function reveal() {
+// Reveal cards
+const revealed = ref<string[]>([])
+function reveal(revealId: string) {
   let first = true
   deal.value.forEach(({ id }, index) => {
-    if (id === playerId.value) {
+    if (id === revealId) {
       dealCardPositions.value[index].rotate = "0deg"
       if (first) {
-        dealCardPositions.value[index].translate = "-100% -10%"
+        dealCardPositions.value[index].translate =
+          revealId === playerId.value ? "-100% -10%" : "-77% -10%"
         first = false
       } else {
-        dealCardPositions.value[index].translate = "5% -10%"
+        dealCardPositions.value[index].translate =
+          revealId === playerId.value ? "5% -10%" : "-21% -10%"
       }
     }
   })
-  setTimeout(() => (isRevealed.value = true), 1000)
+  setTimeout(() => revealed.value.push(revealId), 1000)
 }
 
 // Discard
@@ -88,9 +92,9 @@ function discard(id: string) {
     deal.value.forEach((card, index) => {
       if (card.id === id) {
         dealCardPositions.value[index].translate = "-50% 0"
-        dealCardPositions.value[index].left = "calc(100% - var(--size) * 20)"
-        dealCardPositions.value[index].top = "calc(100% - var(--size) * 40)"
-        dealCardPositions.value[index].scale = 0.65
+        dealCardPositions.value[index].left = "var(--left)"
+        dealCardPositions.value[index].top = "var(--top2)"
+        dealCardPositions.value[index].scale = 0.5
       }
     })
   }
@@ -113,7 +117,6 @@ const animatedCommunityCards = computed(() =>
 )
 function animateCommunityCards() {
   setTimeout(() => {
-    // const cardPlayerId = deal.value[dealIndex.value - 1].id
     communityCardPositions.value[communityCardsIndex.value - 1] = {
       flipped: false,
       left: `${(100 / 5) * (communityCardsIndex.value - 1) + 10}%`,
@@ -134,18 +137,26 @@ watch(round, () => {
   }, intervalDelay)
 })
 
-// End round
-watch(roundWinners, () => {
-  const ids = Object.keys(roundWinners.value)
-  for (const id of ids) {
-    discard(id)
+// Showdown
+watch(round, () => {
+  if (round.value === 4) {
+    playerOrder.value.forEach(reveal)
   }
-  communityCardPositions.value.forEach((position) => {
-    position.flipped = true
-    position.left = "calc(100% - var(--size) * 20)"
-    position.top = "calc(100% - var(--size) * 40)"
-    position.scale = 0.65
-  })
+})
+
+// End round
+watch(step, () => {
+  if (step.value === Step.ROUND_END) {
+    for (const id of playerIds.value) {
+      discard(id)
+    }
+    communityCardPositions.value.forEach((position) => {
+      position.flipped = true
+      position.left = "var(--left)"
+      position.top = "var(--top2)"
+      position.scale = 0.5
+    })
+  }
 })
 </script>
 
@@ -156,9 +167,15 @@ watch(roundWinners, () => {
     class="card"
     :class="{
       pulsate:
-        id === playerId && canPlay && !isRevealed && !discardIds.includes(id),
+        id === playerId &&
+        canPlay &&
+        !revealed.includes(playerId) &&
+        !discardIds.includes(id),
+      not:
+        winnerCards.length > 0 &&
+        !winnerCards.includes(`${card.rank}${card.suit}`),
     }"
-    :flipped="id !== playerId || !isRevealed || discardIds.includes(id)"
+    :flipped="!revealed.includes(id) || discardIds.includes(id)"
     :rank="card.rank"
     :suit="card.suit"
     :style="dealCardPositions[index]"
@@ -167,16 +184,21 @@ watch(roundWinners, () => {
     v-for="(card, index) of animatedCommunityCards"
     :key="`${card.rank}${card.suit}`"
     class="card"
+    :class="{
+      not:
+        winnerCards.length > 0 &&
+        !winnerCards.includes(`${card.rank}${card.suit}`),
+    }"
     :flipped="communityCardPositions[index].flipped"
     :rank="card.rank"
     :suit="card.suit"
     :style="communityCardPositions[index]"
   />
   <button
-    v-if="canPlay && !isRevealed"
+    v-if="canPlay && !revealed.includes(playerId)"
     type="button"
     class="reveal"
-    @click="reveal"
+    @click="reveal(playerId)"
   ></button>
 </template>
 
@@ -186,6 +208,7 @@ watch(roundWinners, () => {
   translate: -50% 0;
   width: calc(var(--size) * 20);
   transition: all 1000ms cubic-bezier(0.28, 0.8, 0.5, 0.95);
+  opacity: 1;
 }
 .pulsate {
   animation: 2s linear infinite both pulse;
@@ -201,6 +224,16 @@ watch(roundWinners, () => {
     scale: 1;
   }
 }
+.not {
+  opacity: 0.5;
+}
+/* .win:before {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 128, 0, 0.1);
+} */
 .reveal {
   position: absolute;
   left: 50%;
