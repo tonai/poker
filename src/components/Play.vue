@@ -88,6 +88,7 @@ watch(step, () => {
 
 <template>
   <div class="play">
+    <NextRound v-if="step === Step.WIN" />
     <Deal
       v-if="showDeal"
       :can-play="canPlay"
@@ -102,7 +103,6 @@ watch(step, () => {
     <MainPlayer />
     <Dealer :player-positions="playerDealerPositions" />
     <Actions v-if="canPlay && playerTurn === playerId" />
-    <NextRound v-if="step === Step.WIN" />
   </div>
 </template>
 
