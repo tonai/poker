@@ -27,7 +27,7 @@ export function nextGame(game: GameState) {
   game.round = 0
   game.roundWinners = {}
   game.step = Step.PLAY
-  game.turnIndex = 2 % game.playerIds.length
+  game.turnIndex = game.playerIds.length === 2 ? 1 : 2
   game.winnerHands = []
   // Shuffle deck and deal 2 cards per players
   const deck = [...initialDeck]
@@ -43,24 +43,30 @@ export function nextGame(game: GameState) {
   }
   game.deck = deck
   // Blinds
+  let smallBlindPlayer = players[0]
+  let bigBlindPlayer = players[1]
+  if (game.playerIds.length === 2) {
+    smallBlindPlayer = players[1]
+    bigBlindPlayer = players[0]
+  }
   game.bets = [
     {
       amount: game.blind / 2,
-      id: players[0],
+      id: smallBlindPlayer,
       raise: 0,
       round: 0,
       type: "small blind",
     },
     {
       amount: game.blind,
-      id: players[1],
+      id: bigBlindPlayer,
       raise: 0,
       round: 0,
       type: "big blind",
     },
   ]
-  game.playerChips[players[0]] -= game.blind / 2
-  game.playerChips[players[1]] -= game.blind
+  game.playerChips[smallBlindPlayer] -= game.blind / 2
+  game.playerChips[bigBlindPlayer] -= game.blind
 }
 
 export function nextRound(game: GameState, foldPlayers: string[]) {
