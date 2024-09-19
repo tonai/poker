@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 
-import { dealerId, playerChips, playerId, winners } from "../store"
+import { playerChips, playerId, winners } from "../store"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
-import Dealer from "./Dealer.vue"
 
 // Amount sync with bet transitions
 const amount = ref(playerChips.value[playerId.value])
@@ -22,7 +21,6 @@ watch(playerChips, () => {
   <div class="main-player">
     <ChipPile :amount="amount" class="chips" />
     <Amount :amount="amount" class="amount" />
-    <Dealer v-if="dealerId === playerId" class="dealer" />
     <div
       v-if="winners.length > 0"
       class="result"
@@ -52,9 +50,9 @@ watch(playerChips, () => {
 .main-player .amount {
   font-size: calc(var(--size) * 7);
 }
-.dealer {
+/* .dealer {
   translate: 50% 0;
-}
+} */
 .result {
   position: absolute;
   bottom: calc(var(--size) * 29);

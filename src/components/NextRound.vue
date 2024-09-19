@@ -3,8 +3,8 @@ import { playerId, playersReady } from "../store"
 
 import Avatar from "./Avatar.vue"
 
-function nextRound() {
-  Dusk.actions.nextRound()
+function endRound() {
+  Dusk.actions.endRound()
 }
 </script>
 
@@ -14,7 +14,7 @@ function nextRound() {
       type="button"
       class="button"
       :class="{ selected: playersReady.includes(playerId) }"
-      @click="nextRound"
+      @click="endRound"
     >
       Next round
     </button>

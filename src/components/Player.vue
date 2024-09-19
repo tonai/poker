@@ -39,7 +39,7 @@ const playerBets = computed(() =>
     }"
   >
     <div class="avatar">
-      <Avatar :id="id" dealer name />
+      <Avatar :id="id" name />
     </div>
     <Amount :amount="amount" class="amount" />
     <div class="messages">

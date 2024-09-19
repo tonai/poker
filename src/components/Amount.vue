@@ -17,7 +17,7 @@ defineProps<{ amount: number }>()
   align-items: center;
   justify-content: center;
   font-size: 1em;
-  gap: 5%;
+  gap: var(--size);
 }
 .chip {
   width: 1em;

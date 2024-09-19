@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
+import { randomInt } from "@tonai/game-utils"
 
-import { otherPlayers, playerId, playerTurn, round, step, winners } from "../store"
+import { otherPlayers, playerId, playerTurn, round, step } from "../store"
 import { Position, Step } from "../types"
 
 import Actions from "./Actions.vue"
 import Deal from "./Deal.vue"
+import Dealer from "./Dealer.vue"
 import MainPlayer from "./MainPlayer.vue"
 import NextRound from "./NextRound.vue"
 import Player from "./Player.vue"
 import Pot from "./Pot.vue"
 
+// Positions
 const playerRefs = ref<InstanceType<typeof Player>[]>([])
 const boundings = computed(() =>
   playerRefs.value
     .filter((ref) => ref.ref)
     .map((ref) => ref.ref!.getBoundingClientRect())
 )
-const playerPositions = computed(() => {
+const playerDealPositions = computed(() => {
   const entries = boundings.value.map(({ left, top, width }, index) => {
     return [
       otherPlayers.value[index],
@@ -50,14 +53,37 @@ const playerChipsPositions = computed(() => {
   ])
   return Object.fromEntries(entries)
 })
+const playerDealerPositions = computed(() => {
+  const entries = boundings.value.map(({ left, top, width }, index) => {
+    return [
+      otherPlayers.value[index],
+      {
+        left: `calc(${left + width / 2}px + var(--size) * 6)`,
+        top: `calc(${top}px + var(--size) * 11)`,
+      },
+    ]
+  }) as [string, Position][]
+  entries.push([playerId.value, { left: "50%", top: "96%" }])
+  return Object.fromEntries(entries)
+})
 
+// Start deal animation
 const showDeal = ref(false)
 onMounted(() => {
   setTimeout(() => (showDeal.value = true), 1000)
 })
 
+// Activate play
 const canPlay = ref(false)
 watch(round, () => (canPlay.value = false))
+
+// Next round
+watch(step, () => {
+  if (step.value === Step.ROUND_END) {
+    const time = 1000 + randomInt(1000, 500)
+    setTimeout(() => Dusk.actions.nextRound(), time)
+  }
+})
 </script>
 
 <template>
@@ -65,7 +91,7 @@ watch(round, () => (canPlay.value = false))
     <Deal
       v-if="showDeal"
       :can-play="canPlay"
-      :player-positions="playerPositions"
+      :player-positions="playerDealPositions"
       :player-card-positions="playerCardPositions"
       @ready="canPlay = true"
     />
@@ -74,6 +100,7 @@ watch(round, () => (canPlay.value = false))
       <Player v-for="id of otherPlayers" :id="id" :key="id" ref="playerRefs" />
     </div>
     <MainPlayer />
+    <Dealer :player-positions="playerDealerPositions" />
     <Actions v-if="canPlay && playerTurn === playerId" />
     <NextRound v-if="step === Step.WIN" />
   </div>

@@ -1,9 +1,19 @@
+<script setup lang="ts">
+import { dealerId } from "../store"
+import { Position } from "../types"
+
+defineProps<{
+  playerPositions: Record<string, Position>
+}>()
+</script>
+
 <template>
-  <div class="dealer">D</div>
+  <div class="dealer" :style="playerPositions[dealerId]">D</div>
 </template>
 
 <style scoped>
 .dealer {
+  position: absolute;
   width: calc(var(--size) * 8);
   height: calc(var(--size) * 8);
   aspect-ratio: 1 / 1;
@@ -16,5 +26,9 @@
   font-weight: bold;
   border: 1px solid gold;
   color: gold;
+  translate: -50% -50%;
+  transition:
+    left 1s ease,
+    top 1s ease;
 }
 </style>

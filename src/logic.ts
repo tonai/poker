@@ -2,7 +2,13 @@ import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
 
 import { startBlind } from "./constants"
 import { Action, Bet, Cards, PlayerCards, Step, WinnerHand } from "./types"
-import { endGame, nextRound, startGame, winRound } from "./logic/round"
+import {
+  endGame,
+  nextGame,
+  nextRound,
+  startGame,
+  winRound,
+} from "./logic/round"
 
 export interface GameState {
   bets: Bet[]
@@ -10,7 +16,7 @@ export interface GameState {
   communityCards: Cards
   dealerIndex: number
   deck: Cards
-  hand: number
+  game: number
   playerCards: PlayerCards[]
   playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
@@ -24,6 +30,7 @@ export interface GameState {
 
 type GameActions = {
   action: (action: Action) => void
+  endRound: () => void
   nextRound: () => void
   ready: () => void
 }
@@ -41,7 +48,7 @@ Dusk.initLogic({
     communityCards: [],
     dealerIndex: -1,
     deck: [],
-    hand: -1,
+    game: -1,
     playerCards: [],
     playerChips: {},
     playerIds: allPlayerIds,
@@ -106,7 +113,7 @@ Dusk.initLogic({
         nextRound(game, foldPlayers)
       }
     },
-    nextRound(_, { game, playerId }) {
+    endRound(_, { game, playerId }) {
       if (game.step !== Step.WIN) {
         return Dusk.invalidAction()
       }
@@ -119,6 +126,12 @@ Dusk.initLogic({
           endGame(game)
         }
       }
+    },
+    nextRound(_, { game }) {
+      if (game.step !== Step.ROUND_END) {
+        return Dusk.invalidAction()
+      }
+      nextGame(game)
     },
     ready(_, { game, playerId }) {
       if (game.step !== Step.WAIT) {

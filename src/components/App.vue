@@ -7,7 +7,7 @@ import {
   blind,
   communityCards,
   dealerIndex,
-  hand,
+  gameRound,
   playerId,
   playerCards,
   playerChips,
@@ -42,8 +42,8 @@ onMounted(() => {
       if (dealerIndex.value !== game.dealerIndex) {
         dealerIndex.value = game.dealerIndex
       }
-      if (hand.value !== game.hand) {
-        hand.value = game.hand
+      if (gameRound.value !== game.game) {
+        gameRound.value = game.game
       }
       if (playerCards.value !== game.playerCards) {
         playerCards.value = game.playerCards
@@ -82,7 +82,7 @@ onMounted(() => {
   <StartScreen v-if="step === Step.WAIT" />
   <Play
     v-if="step === Step.PLAY || step === Step.ROUND_END || step === Step.WIN"
-    :key="hand"
+    :key="gameRound"
   />
 </template>
 

@@ -7,8 +7,8 @@ import { Step } from "../types"
 
 export function startGame(game: GameState) {
   // Start game
-  game.hand = -1
-  game.dealerIndex = -1
+  game.game = -1
+  game.dealerIndex = 0
   game.playerChips = Object.fromEntries(
     game.playerIds.map((id) => [id, startPlayerAmount])
   )
@@ -17,12 +17,17 @@ export function startGame(game: GameState) {
 
 export function nextGame(game: GameState) {
   // Start round
-  game.step = Step.PLAY
+  game.bets = []
+  game.blind = startBlind // TODO
+  game.communityCards = []
+  game.deck = []
+  game.game++
+  game.playerCards = []
   game.playersReady = []
-  game.hand++
   game.round = 0
-  game.blind = startBlind
-  game.dealerIndex = (game.dealerIndex + 1) % game.playerIds.length
+  game.roundWinners = {}
+  game.step = Step.PLAY
+  game.turnIndex = 2 % game.playerIds.length
   game.winnerHands = []
   // Shuffle deck and deal 2 cards per players
   const deck = [...initialDeck]
@@ -56,7 +61,6 @@ export function nextGame(game: GameState) {
   ]
   game.playerChips[players[0]] -= game.blind / 2
   game.playerChips[players[1]] -= game.blind
-  game.turnIndex = 2 % game.playerIds.length
 }
 
 export function nextRound(game: GameState, foldPlayers: string[]) {
@@ -110,5 +114,8 @@ export function winRound(game: GameState, winners: Record<string, number>) {
 
 export function endGame(game: GameState) {
   game.turnIndex = -1
+  game.dealerIndex = (game.dealerIndex + 1) % game.playerIds.length
+  game.roundWinners = {}
+  game.winnerHands = []
   game.step = Step.ROUND_END
 }
