@@ -48,18 +48,18 @@ watch(bets, () => {
 const totalPosition = ref<Record<string, Position>>({})
 const animationEnd = ref(false)
 watch(roundWinners, () => {
-  setTimeout(() => {
-    totalPosition.value = Object.fromEntries(
-      Object.keys(roundWinners.value).map((id) => [
-        id,
-        props.playerPositions[id],
-      ])
-    )
-    total.value = 0
-  }, 1200)
-  setTimeout(() => {
-    animationEnd.value = true
-  }, 2200)
+  const winners = Object.keys(roundWinners.value)
+  if (winners.length > 0) {
+    setTimeout(() => {
+      totalPosition.value = Object.fromEntries(
+        winners.map((id) => [id, props.playerPositions[id]])
+      )
+      total.value = 0
+    }, 1200)
+    setTimeout(() => {
+      animationEnd.value = true
+    }, 2200)
+  }
 })
 </script>
 

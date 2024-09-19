@@ -1,6 +1,6 @@
 import { shuffleArray } from "@tonai/game-utils/server"
 
-import { initialDeck, startBlind, startPlayerAmount } from "../constants"
+import { initialDeck, startPlayerAmount } from "../constants"
 import { compareHands, getHand, getSortedCards } from "../helpers"
 import { GameState } from "../logic"
 import { Step } from "../types"
@@ -18,7 +18,6 @@ export function startGame(game: GameState) {
 export function nextGame(game: GameState) {
   // Start round
   game.bets = []
-  game.blind = startBlind // TODO
   game.communityCards = []
   game.deck = []
   game.game++
@@ -43,6 +42,9 @@ export function nextGame(game: GameState) {
   }
   game.deck = deck
   // Blinds
+  if (game.dealerIndex === 0) {
+    game.blind *= 2
+  }
   let smallBlindPlayer = players[0]
   let bigBlindPlayer = players[1]
   if (game.playerIds.length === 2) {

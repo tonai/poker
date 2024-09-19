@@ -41,7 +41,7 @@ function endRound() {
   <div class="nextRound">
     <button
       type="button"
-      class="button"
+      class="button endRound"
       :class="{ selected: playersReady.includes(playerId) }"
       @click="endRound"
     >
@@ -68,6 +68,17 @@ function endRound() {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.endRound {
+  animation: 1s ease-out 1s both slide-right;
+}
+@keyframes slide-right {
+  0% {
+    translate: -200% 0;
+  }
+  100% {
+    translate: 0 0;
+  }
 }
 .button {
   z-index: 1;
