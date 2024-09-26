@@ -33,7 +33,7 @@ watch(playerChips, () => {
         loser: !winners.includes(playerId) || playerOut,
       }"
     >
-      {{ playerOut ? "Out" : winners.includes(playerId) ? "Win" : "Lost" }}
+      {{ playerOut ? "Out" : winners.includes(playerId) ? "Won" : "Lost" }}
     </div>
   </div>
 </template>

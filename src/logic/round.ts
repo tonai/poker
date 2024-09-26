@@ -130,6 +130,16 @@ export function winRound(game: GameState, winners: Record<string, number>) {
   game.remainingPlayers = Object.entries(game.playerChips)
     .filter(([, amount]) => amount !== 0)
     .map(([id]) => id)
+  if (game.remainingPlayers.length === 1) {
+    Dusk.gameOver({
+      players: Object.fromEntries(
+        game.playerIds.map((id) => [
+          id,
+          game.playerChips[id] === 0 ? "LOST" : "WON",
+        ])
+      ),
+    })
+  }
 }
 
 export function endGame(game: GameState) {
