@@ -1,5 +1,7 @@
 import { createArray } from "@tonai/game-utils"
 
+import { Bet } from "../types"
+
 export function getColor(amount?: number | string) {
   switch (Number(amount)) {
     case 1:
@@ -39,4 +41,49 @@ export function getChips(amount: number) {
     index++
   }
   return chips
+}
+
+export function getBetsByPlayers(bets: Bet[]): Record<string, number> {
+  return bets.reduce<Record<string, number>>((acc, { amount, id }) => {
+    acc[id] = (acc[id] ?? 0) + amount
+    return acc
+  }, {})
+}
+
+export function getShares(
+  playerBets: Record<string, number>,
+  winners: string[]
+): Record<string, number> {
+  const playerBetEntries = Object.entries(playerBets)
+  const sortedBets = playerBetEntries
+    .map(([id, amount]) => ({ amount, id }))
+    .sort(({ amount: amountA }, { amount: amountB }) => amountA - amountB) // ascending
+  const sidePots: { amount: number; id: string }[] = []
+  const overflow: Record<string, number> = {}
+  for (const { amount, id } of sortedBets) {
+    if (winners.includes(id)) {
+      const total = sortedBets.reduce((acc, playerBet) => {
+        const min = Math.min(playerBet.amount, amount)
+        playerBet.amount -= min
+        return acc + min
+      }, 0)
+      sidePots.push({ amount: total, id })
+    } else if (winners.length === sidePots.length && amount > 0) {
+      overflow[id] = amount
+    }
+  }
+
+  const winnerGains: Record<string, number> = {}
+  let remaining = 0
+  for (let i = 0; i < sidePots.length; i++) {
+    const { amount, id } = sidePots[i]
+    if (winners.includes(id)) {
+      const totalToShare = amount + remaining
+      winnerGains[id] = Math.floor(totalToShare / (winners.length - i))
+      remaining =
+        (totalToShare / (winners.length - i)) * (winners.length - 1 - i)
+    }
+  }
+
+  return { ...winnerGains, ...overflow }
 }

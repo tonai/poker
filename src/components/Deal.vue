@@ -10,7 +10,6 @@ import {
   playerCards,
   playerId,
   playerIds,
-  playerOrder,
   round,
   step,
   winnerCards,
@@ -140,7 +139,7 @@ watch(round, () => {
 // Showdown
 watch(round, () => {
   if (round.value === 4) {
-    playerOrder.value.forEach(reveal)
+    playerIds.value.forEach(reveal)
   }
 })
 
@@ -171,11 +170,12 @@ watch(step, () => {
         canPlay &&
         !revealed.includes(playerId) &&
         !discardIds.includes(id),
-      not:
-        winnerCards.length > 0 &&
-        !winnerCards.includes(`${card.rank}${card.suit}`),
     }"
     :flipped="!revealed.includes(id) || discardIds.includes(id)"
+    :opacity="
+      winnerCards.length > 0 &&
+      !winnerCards.includes(`${card.rank}${card.suit}`)
+    "
     :rank="card.rank"
     :suit="card.suit"
     :style="dealCardPositions[index]"
@@ -184,12 +184,11 @@ watch(step, () => {
     v-for="(card, index) of animatedCommunityCards"
     :key="`${card.rank}${card.suit}`"
     class="card"
-    :class="{
-      not:
-        winnerCards.length > 0 &&
-        !winnerCards.includes(`${card.rank}${card.suit}`),
-    }"
     :flipped="communityCardPositions[index].flipped"
+    :opacity="
+      winnerCards.length > 0 &&
+      !winnerCards.includes(`${card.rank}${card.suit}`)
+    "
     :rank="card.rank"
     :suit="card.suit"
     :style="communityCardPositions[index]"
@@ -208,7 +207,6 @@ watch(step, () => {
   translate: -50% 0;
   width: calc(var(--size) * 20);
   transition: all 1000ms cubic-bezier(0.28, 0.8, 0.5, 0.95);
-  opacity: 1;
 }
 .pulsate {
   animation: 2s linear infinite both pulse;
@@ -224,16 +222,6 @@ watch(step, () => {
     scale: 1;
   }
 }
-.not {
-  opacity: 0.5;
-}
-/* .win:before {
-  content: '';
-  display: block;
-  position: absolute;
-  inset: 0;
-  background-color: rgba(0, 128, 0, 0.1);
-} */
 .reveal {
   position: absolute;
   left: 50%;

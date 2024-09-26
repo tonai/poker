@@ -3,6 +3,7 @@ import { computed, ref } from "vue"
 
 import {
   blind,
+  disableRaise,
   maxRoundBet,
   playerChips,
   playerId,
@@ -13,18 +14,19 @@ import {
 import Amount from "./Amount.vue"
 import Chip from "./Chip.vue"
 
+type GroupedActionType = "allIn" | "checkOrCall" | "fold" | "raise"
+
 const checkOrCallBet = computed(
   () => maxRoundBet.value - (playerBets.value[playerId.value] ?? 0)
 )
 const minRaise = computed(
-  () =>
-    roundBets.value.find(({ type }) => type === "raise")?.raise ?? blind.value
+  () => roundBets.value.find(({ raise }) => raise)?.raise ?? blind.value
 )
 
-const action = ref<"checkOrCall" | "fold" | "raise">()
+const action = ref<GroupedActionType>()
 const raiseValue = ref(minRaise.value)
 
-function select(type: "checkOrCall" | "fold" | "raise") {
+function select(type: GroupedActionType) {
   if (action.value === type) {
     action.value = undefined
   } else {
@@ -40,14 +42,24 @@ function confirm() {
         amount: checkOrCallBet.value,
       })
     } else if (action.value === "raise") {
+      const amount = Math.min(
+        raiseValue.value + checkOrCallBet.value,
+        playerChips.value[playerId.value]
+      )
       Dusk.actions.action({
-        type: action.value,
-        amount: raiseValue.value + checkOrCallBet.value,
-        raise: raiseValue.value,
+        type: amount === playerChips.value[playerId.value] ? "allIn" : "raise",
+        amount: amount,
+        raise: amount - checkOrCallBet.value,
+      })
+    } else if (action.value === "allIn") {
+      Dusk.actions.action({
+        type: "allIn",
+        amount: playerChips.value[playerId.value],
+        raise: playerChips.value[playerId.value] - checkOrCallBet.value,
       })
     } else {
       Dusk.actions.action({
-        type: action.value,
+        type: "fold",
         amount: 0,
       })
     }
@@ -63,6 +75,7 @@ function confirm() {
         type="button"
         class="button"
         :class="{ selected: action === 'checkOrCall' }"
+        :disabled="checkOrCallBet > playerChips[playerId]"
         @click="select('checkOrCall')"
       >
         {{ checkOrCallBet === 0 ? "Check" : "Call" }}
@@ -71,9 +84,19 @@ function confirm() {
         type="button"
         class="button"
         :class="{ selected: action === 'raise' }"
+        :disabled="minRaise > playerChips[playerId] || disableRaise"
         @click="select('raise')"
       >
         Raise
+      </button>
+      <button
+        type="button"
+        class="button"
+        :disabled="disableRaise"
+        :class="{ selected: action === 'allIn' }"
+        @click="select('allIn')"
+      >
+        All-in
       </button>
       <button
         type="button"

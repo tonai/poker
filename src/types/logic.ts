@@ -14,16 +14,18 @@ export interface PlayerCards {
   id: PlayerId
 }
 
+export type ActionType = "allIn" | "call" | "check" | "fold" | "raise"
+
 export interface Bet {
   amount: number
   id: PlayerId
   raise: number
   round: number
-  type: "big blind" | "call" | "check" | "fold" | "raise" | "small blind"
+  type: ActionType | "bigBlind" | "smallBlind"
 }
 
 export interface Action {
-  type: "call" | "check" | "fold" | "raise"
+  type: ActionType
   amount: number
   raise?: number
 }

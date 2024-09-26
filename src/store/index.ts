@@ -23,6 +23,12 @@ export const winnerHands = ref<WinnerHand[]>([])
 export const foldPlayers = computed(() =>
   bets.value.filter(({ type }) => type === "fold").map(({ id }) => id)
 )
+export const allInPlayers = computed(() =>
+  bets.value.filter(({ type }) => type === "allIn").map(({ id }) => id)
+)
+export const skipPlayers = computed(() =>
+  foldPlayers.value.concat(allInPlayers.value)
+)
 export const otherPlayers = computed(() => {
   const index = playerIds.value.findIndex((id) => id === playerId.value)
   return playerIds.value
@@ -34,7 +40,7 @@ export const playerOrder = computed(() =>
   playerIds.value
     .slice(dealerIndex.value + 1)
     .concat(playerIds.value.slice(0, dealerIndex.value + 1))
-    .filter((id) => !foldPlayers.value.includes(id))
+    .filter((id) => !skipPlayers.value.includes(id))
 )
 export const playerTurn = computed(() => {
   return playerOrder.value[turnIndex.value]
@@ -62,3 +68,8 @@ export const winnerCards = computed(() => [
       .map((card) => `${getRank(card.rank)}${card.suit}`)
   ),
 ])
+export const disableRaise = computed(
+  () =>
+    playerOrder.value.filter((id) => !skipPlayers.value.includes(id)).length <=
+    1
+)

@@ -1,7 +1,13 @@
 import { shuffleArray } from "@tonai/game-utils/server"
 
 import { initialDeck, startPlayerAmount } from "../constants"
-import { compareHands, getHand, getSortedCards } from "../helpers"
+import {
+  compareHands,
+  getBetsByPlayers,
+  getHand,
+  getShares,
+  getSortedCards,
+} from "../helpers"
 import { GameState } from "../logic"
 import { Step } from "../types"
 
@@ -57,14 +63,14 @@ export function nextGame(game: GameState) {
       id: smallBlindPlayer,
       raise: 0,
       round: 0,
-      type: "small blind",
+      type: "smallBlind",
     },
     {
       amount: game.blind,
       id: bigBlindPlayer,
       raise: 0,
       round: 0,
-      type: "big blind",
+      type: "bigBlind",
     },
   ]
   game.playerChips[smallBlindPlayer] -= game.blind / 2
@@ -76,6 +82,8 @@ export function nextRound(game: GameState, foldPlayers: string[]) {
   if (game.round === 4) {
     // Showdown
     game.turnIndex = -1
+
+    // Calculate best hands
     const hands = game.playerCards
       .filter(({ id }) => !foldPlayers.includes(id))
       .map(({ cards, id }) => ({
@@ -87,12 +95,10 @@ export function nextRound(game: GameState, foldPlayers: string[]) {
     const winnerHands = [first].concat(
       otherHands.filter(({ hand }) => compareHands(first.hand, hand) === 0)
     )
-    const total = game.bets.reduce((acc, { amount }) => acc + amount, 0)
     game.winnerHands = winnerHands
-    const winners = Object.fromEntries(
-      winnerHands.map(({ id }) => [id, total / winnerHands.length])
-    )
-    winRound(game, winners)
+    const winners = winnerHands.map(({ id }) => id)
+    const playerBets = getBetsByPlayers(game.bets)
+    winRound(game, getShares(playerBets, winners))
   } else {
     game.turnIndex = 0
     // Burn card

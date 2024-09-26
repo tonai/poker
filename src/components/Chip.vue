@@ -5,9 +5,10 @@ import { getColor } from "../helpers"
 
 const props = defineProps<{
   amount?: number | string
+  color?: string
 }>()
 
-const color = computed(() => getColor(props.amount))
+const color = computed(() => props.color ?? getColor(props.amount))
 </script>
 
 <template>

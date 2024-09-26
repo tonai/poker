@@ -9,6 +9,7 @@ import {
   startGame,
   winRound,
 } from "./logic/round"
+import { getBetsByPlayers, getShares } from "./helpers"
 
 export interface GameState {
   bets: Bet[]
@@ -72,39 +73,50 @@ Dusk.initLogic({
         type: action.type,
       })
       game.playerChips[playerId] -= action.amount
-      const foldPlayers = game.bets
-        .filter(({ type }) => type === "fold")
-        .map(({ id }) => id)
+
+      // Player states (fold / all-in)
+      const playerStates = game.bets.reduce<Record<string, "allIn" | "fold">>(
+        (acc, { id, type }) => {
+          if (type === "fold" || type === "allIn") {
+            acc[id] = type
+          }
+          return acc
+        },
+        {}
+      )
+      const foldPlayers = Object.entries(playerStates)
+        .filter(([, type]) => type === "fold")
+        .map(([id]) => id)
+      const skipPlayers = Object.keys(playerStates)
+
       if (foldPlayers.length === game.playerIds.length - 1) {
         // Everybody fold
         const winner = game.playerIds.find((id) => !foldPlayers.includes(id))
         if (winner) {
-          const total = game.bets.reduce((acc, { amount }) => acc + amount, 0)
-          winRound(game, { [winner]: total })
+          const playerBets = getBetsByPlayers(game.bets)
+          winRound(game, getShares(playerBets, [winner]))
         }
         return
       }
+
       const roundBets = game.bets.filter(({ round }) => round === game.round)
-      const nonFoldBets = roundBets.filter(
-        ({ id }) => !foldPlayers.includes(id)
-      )
-      const playerBets = Object.values(
-        nonFoldBets.reduce<Record<string, number>>((acc, { amount, id }) => {
-          acc[id] = (acc[id] ?? 0) + amount
-          return acc
-        }, {})
-      )
-      const roundFoldPlayers = roundBets
-        .filter(({ type }) => type === "fold")
+      const playerRoundBets = getBetsByPlayers(roundBets)
+      const maxRoundBet = Math.max(...Object.values(playerRoundBets))
+      const roundSkipPlayers = roundBets
+        .filter(({ type }) => type === "fold" || type === "allIn")
         .map(({ id }) => id)
-      const playersIn = game.playerIds.length - foldPlayers.length
+      const playersIn = game.playerIds.length - skipPlayers.length
+      const arePlayersBettingTheMax = Object.entries(playerRoundBets)
+        .filter(([id]) => !skipPlayers.includes(id))
+        .some(([, total]) => total !== maxRoundBet)
+
       if (
         (game.round === 0 && roundBets.length < game.playerIds.length + 2) ||
-        roundBets.length < playersIn + roundFoldPlayers.length ||
-        playerBets.some((total) => total !== playerBets[0])
+        roundBets.length < playersIn + roundSkipPlayers.length ||
+        arePlayersBettingTheMax
       ) {
         // Continue betting round
-        if (action.type !== "fold") {
+        if (action.type !== "fold" && action.type !== "allIn") {
           game.turnIndex++
         }
         game.turnIndex = game.turnIndex % playersIn

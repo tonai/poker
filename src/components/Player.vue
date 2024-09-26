@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
-import { bets, playerChips, winners } from "../store"
+import { allInPlayers, bets, playerChips, winners } from "../store"
 
 import Amount from "./Amount.vue"
 import Avatar from "./Avatar.vue"
@@ -41,7 +41,11 @@ const playerBets = computed(() =>
     <div class="avatar">
       <Avatar :id="id" name />
     </div>
-    <Amount :amount="amount" class="amount" />
+    <Amount
+      :all-in="allInPlayers.includes(id)"
+      :amount="amount"
+      class="amount"
+    />
     <div class="messages">
       <Message v-for="(bet, index) of playerBets" :key="index" :bet="bet" />
     </div>
@@ -59,10 +63,15 @@ const playerBets = computed(() =>
   content: "";
   display: block;
   position: absolute;
-  inset: 0;
-  border-radius: var(--size);
+  border-radius: calc(var(--size) * 3);
   transition: scale 1s ease;
   scale: 0;
+  top: 0;
+  max-width: calc(var(--size) * 30);
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 100%;
 }
 .winner:before {
   scale: 1;

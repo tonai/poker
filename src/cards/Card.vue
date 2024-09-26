@@ -7,6 +7,7 @@ import CardFront from "./CardFront.vue"
 withDefaults(
   defineProps<{
     flipped?: boolean
+    opacity?: boolean
     rank: Rank
     suit: Suit
   }>(),
@@ -17,8 +18,8 @@ withDefaults(
 </script>
 
 <template>
-  <div class="card" :class="{ flipped }">
-    <CardFront :rank="rank" :suit="suit" />
+  <div class="card" :class="{ flipped, opacity }">
+    <CardFront class="front" :rank="rank" :suit="suit" />
     <CardBack class="back" />
   </div>
 </template>
@@ -37,10 +38,18 @@ withDefaults(
 .card > svg {
   grid-area: 1 / 1;
 }
+.front {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
 .back {
   translate: 0 0 -1px;
   backface-visibility: hidden;
   transform-style: preserve-3d;
   transform: rotateY(180deg);
+}
+.opacity .front,
+.opacity .back {
+  opacity: 0.5;
 }
 </style>

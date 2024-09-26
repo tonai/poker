@@ -9,7 +9,9 @@ const props = defineProps<{
 const message = computed(() => {
   const { raise, type } = props.bet
   switch (type) {
-    case "big blind":
+    case "allIn":
+      return "All-in"
+    case "bigBlind":
       return "Big bling"
     case "call":
       return `Call`
@@ -19,7 +21,7 @@ const message = computed(() => {
       return "Fold"
     case "raise":
       return `Raise by ${raise}`
-    case "small blind":
+    case "smallBlind":
       return "Small blind"
   }
   return ""

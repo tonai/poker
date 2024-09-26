@@ -34,13 +34,14 @@ main {
   background: white;
   border-radius: calc(var(--size) * 2);
   border: var(--size) solid white;
-  padding: calc(var(--size) * 2) calc(var(--size) * 4);
-  min-width: calc(var(--size) * 25);
+  padding: calc(var(--size) * 2);
+  min-width: calc(var(--size) * 20);
   height: calc(var(--size)* 14);
   position: relative;
   font-size: calc(var(--size) * 6);
   transition: transform 400ms ease;
   transform: scale(1);
+  color: currentColor;
 }
 
 .field {
@@ -58,6 +59,10 @@ main {
   height: 100%;
   width: 100%;
   font-size: calc(var(--size)* 8);
+}
+
+.button:disabled {
+  opacity: 0.5;
 }
 
 .button:after {
@@ -81,11 +86,11 @@ main {
 }
 
 .button.selected,
-.button:active {
+.button:not(:disabled):active {
   transform: scale(1.2);
 }
 
 .button.selected:before,
-.button:active:before {
+.button:not(:disabled):active:before {
   background-color: red;
 }

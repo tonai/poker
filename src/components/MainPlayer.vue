@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 
-import { playerChips, playerId, winners } from "../store"
+import { allInPlayers, playerChips, playerId, winners } from "../store"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
@@ -20,7 +20,11 @@ watch(playerChips, () => {
 <template>
   <div class="main-player">
     <ChipPile :amount="amount" class="chips" />
-    <Amount :amount="amount" class="amount" />
+    <Amount
+      :all-in="allInPlayers.includes(playerId)"
+      :amount="amount"
+      class="amount"
+    />
     <div
       v-if="winners.length > 0"
       class="result"
