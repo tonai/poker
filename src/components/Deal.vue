@@ -9,6 +9,7 @@ import {
   foldPlayers,
   playerCards,
   playerId,
+  playerIds,
   remainingPlayers,
   round,
   step,
@@ -139,14 +140,14 @@ watch(round, () => {
 // Showdown
 watch(round, () => {
   if (round.value === 4) {
-    remainingPlayers.value.forEach(reveal)
+    playerIds.value.forEach(reveal)
   }
 })
 
 // End round
 watch(step, () => {
   if (step.value === Step.ROUND_END) {
-    for (const id of remainingPlayers.value) {
+    for (const id of playerIds.value) {
       discard(id)
     }
     communityCardPositions.value.forEach((position) => {

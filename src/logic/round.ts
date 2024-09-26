@@ -117,6 +117,13 @@ export function nextRound(game: GameState, foldPlayers: string[]) {
       // Turn and River
       game.communityCards.push(game.deck.shift()!)
     }
+
+    const skipPlayers = game.bets
+      .filter(({ type }) => type === "fold" || type === "allIn")
+      .map(({ id }) => id)
+    if (skipPlayers.length === game.remainingPlayers.length) {
+      nextRound(game, foldPlayers)
+    }
   }
 }
 
