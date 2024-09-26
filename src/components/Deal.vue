@@ -9,7 +9,7 @@ import {
   foldPlayers,
   playerCards,
   playerId,
-  playerIds,
+  remainingPlayers,
   round,
   step,
   winnerCards,
@@ -29,7 +29,7 @@ const animationDelay = 100
 
 // Deal cards
 const dealCardPositions = ref<CardPosition[]>(
-  createArray(playerIds.value.length * 2, {
+  createArray(remainingPlayers.value.length * 2, {
     ...props.playerPositions[dealerId.value],
   })
 )
@@ -139,14 +139,14 @@ watch(round, () => {
 // Showdown
 watch(round, () => {
   if (round.value === 4) {
-    playerIds.value.forEach(reveal)
+    remainingPlayers.value.forEach(reveal)
   }
 })
 
 // End round
 watch(step, () => {
   if (step.value === Step.ROUND_END) {
-    for (const id of playerIds.value) {
+    for (const id of remainingPlayers.value) {
       discard(id)
     }
     communityCardPositions.value.forEach((position) => {

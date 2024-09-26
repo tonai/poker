@@ -13,6 +13,7 @@ import {
   playerChips,
   playerIds,
   playersReady,
+  remainingPlayers,
   round,
   roundWinners,
   step,
@@ -56,6 +57,9 @@ onMounted(() => {
       }
       if (playersReady.value !== game.playersReady) {
         playersReady.value = game.playersReady
+      }
+      if (remainingPlayers.value !== game.remainingPlayers) {
+        remainingPlayers.value = game.remainingPlayers
       }
       if (round.value !== game.round) {
         round.value = game.round

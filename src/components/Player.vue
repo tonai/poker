@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
-import { allInPlayers, bets, playerChips, winners } from "../store"
+
+import {
+  allInPlayers,
+  bets,
+  playerChips,
+  remainingPlayers,
+  winners,
+} from "../store"
 
 import Amount from "./Amount.vue"
 import Avatar from "./Avatar.vue"
@@ -36,6 +43,7 @@ const playerBets = computed(() =>
     :class="{
       winner: winners.length > 0 && winners.includes(id),
       loser: winners.length > 0 && !winners.includes(id),
+      out: !remainingPlayers.includes(id),
     }"
   >
     <div class="avatar">
@@ -58,6 +66,7 @@ const playerBets = computed(() =>
   position: relative;
   transition: opacity 1s ease;
   opacity: 1;
+  transition: translate 500ms ease-out;
 }
 .player:before {
   content: "";
@@ -87,6 +96,10 @@ const playerBets = computed(() =>
   }
 }
 .loser {
+  opacity: 0.5;
+}
+.out {
+  translate: 0 calc(var(--size) * -10);
   opacity: 0.5;
 }
 .avatar {

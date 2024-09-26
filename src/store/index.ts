@@ -14,12 +14,16 @@ export const playerCards = ref<PlayerCards[]>([])
 export const playerChips = ref<Record<string, number>>({})
 export const playerIds = ref<string[]>([])
 export const playersReady = ref<string[]>([])
+export const remainingPlayers = ref<string[]>([])
 export const round = ref(0)
 export const roundWinners = ref<Record<string, number>>({})
 export const step = ref<Step>(Step.WAIT)
 export const turnIndex = ref(0)
 export const winnerHands = ref<WinnerHand[]>([])
 
+export const playerOut = computed(
+  () => !remainingPlayers.value.includes(playerId.value)
+)
 export const foldPlayers = computed(() =>
   bets.value.filter(({ type }) => type === "fold").map(({ id }) => id)
 )
@@ -35,11 +39,13 @@ export const otherPlayers = computed(() => {
     .slice(index + 1)
     .concat(playerIds.value.slice(0, index))
 })
-export const dealerId = computed(() => playerIds.value[dealerIndex.value])
+export const dealerId = computed(
+  () => remainingPlayers.value[dealerIndex.value]
+)
 export const playerOrder = computed(() =>
-  playerIds.value
+  remainingPlayers.value
     .slice(dealerIndex.value + 1)
-    .concat(playerIds.value.slice(0, dealerIndex.value + 1))
+    .concat(remainingPlayers.value.slice(0, dealerIndex.value + 1))
     .filter((id) => !skipPlayers.value.includes(id))
 )
 export const playerTurn = computed(() => {

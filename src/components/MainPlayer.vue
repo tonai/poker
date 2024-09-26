@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 
-import { allInPlayers, playerChips, playerId, winners } from "../store"
+import { allInPlayers, playerChips, playerId, playerOut, winners } from "../store"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
@@ -26,14 +26,14 @@ watch(playerChips, () => {
       class="amount"
     />
     <div
-      v-if="winners.length > 0"
+      v-if="winners.length > 0 || playerOut"
       class="result"
       :class="{
         winner: winners.includes(playerId),
-        loser: !winners.includes(playerId),
+        loser: !winners.includes(playerId) || playerOut,
       }"
     >
-      {{ winners.includes(playerId) ? "Win" : "Lost" }}
+      {{ playerOut ? "Out" : winners.includes(playerId) ? "Win" : "Lost" }}
     </div>
   </div>
 </template>

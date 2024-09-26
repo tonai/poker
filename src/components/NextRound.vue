@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 
-import { playerId, playersReady, winnerHands } from "../store"
+import { playerId, playerOut, playersReady, winnerHands } from "../store"
 import { HandCategory } from "../types"
 
 import Avatar from "./Avatar.vue"
@@ -38,7 +38,7 @@ function endRound() {
 </script>
 
 <template>
-  <div class="nextRound">
+  <div v-if="!playerOut" class="nextRound">
     <button
       type="button"
       class="button endRound"

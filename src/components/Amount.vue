@@ -1,16 +1,23 @@
 <script setup lang="ts">
+import { computed } from "vue"
+
+import { step } from "../store"
+import { Step } from "../types"
+
 import Chip from "./Chip.vue"
 
-defineProps<{
+const props = defineProps<{
   allIn?: boolean
   amount: number
 }>()
+
+const isAllIn = computed(() => props.allIn && step.value === Step.PLAY)
 </script>
 
 <template>
-  <div class="chips" :class="{ allIn }">
-    {{ allIn ? "All-in" : amount }}
-    <Chip class="chip" :color="allIn ? '#950000' : undefined" />
+  <div class="chips" :class="{ isAllIn }">
+    {{ isAllIn ? "All-in" : amount }}
+    <Chip class="chip" :color="isAllIn ? '#950000' : undefined" />
   </div>
 </template>
 
@@ -23,7 +30,7 @@ defineProps<{
   gap: var(--size);
   transition: color 400ms ease;
 }
-.allIn {
+.isAllIn {
   font-weight: bold;
   color: #950000;
 }

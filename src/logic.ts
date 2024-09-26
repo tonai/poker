@@ -22,6 +22,7 @@ export interface GameState {
   playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
   playersReady: PlayerId[]
+  remainingPlayers: PlayerId[]
   round: number
   roundWinners: Record<PlayerId, number>
   step: Step
@@ -54,6 +55,7 @@ Dusk.initLogic({
     playerChips: {},
     playerIds: allPlayerIds,
     playersReady: [],
+    remainingPlayers: [],
     round: 0,
     roundWinners: {},
     step: Step.WAIT,
@@ -89,9 +91,11 @@ Dusk.initLogic({
         .map(([id]) => id)
       const skipPlayers = Object.keys(playerStates)
 
-      if (foldPlayers.length === game.playerIds.length - 1) {
+      if (foldPlayers.length === game.remainingPlayers.length - 1) {
         // Everybody fold
-        const winner = game.playerIds.find((id) => !foldPlayers.includes(id))
+        const winner = game.remainingPlayers.find(
+          (id) => !foldPlayers.includes(id)
+        )
         if (winner) {
           const playerBets = getBetsByPlayers(game.bets)
           winRound(game, getShares(playerBets, [winner]))
@@ -105,13 +109,13 @@ Dusk.initLogic({
       const roundSkipPlayers = roundBets
         .filter(({ type }) => type === "fold" || type === "allIn")
         .map(({ id }) => id)
-      const playersIn = game.playerIds.length - skipPlayers.length
+      const playersIn = game.remainingPlayers.length - skipPlayers.length
       const arePlayersBettingTheMax = Object.entries(playerRoundBets)
         .filter(([id]) => !skipPlayers.includes(id))
         .some(([, total]) => total !== maxRoundBet)
 
       if (
-        (game.round === 0 && roundBets.length < game.playerIds.length + 2) ||
+        (game.round === 0 && roundBets.length < game.remainingPlayers.length + 2) ||
         roundBets.length < playersIn + roundSkipPlayers.length ||
         arePlayersBettingTheMax
       ) {
@@ -134,7 +138,7 @@ Dusk.initLogic({
         game.playersReady.splice(index, 1)
       } else {
         game.playersReady.push(playerId)
-        if (game.playersReady.length === game.playerIds.length) {
+        if (game.playersReady.length === game.remainingPlayers.length) {
           endGame(game)
         }
       }

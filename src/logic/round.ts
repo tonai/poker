@@ -3,6 +3,7 @@ import { shuffleArray } from "@tonai/game-utils/server"
 import { initialDeck, startPlayerAmount } from "../constants"
 import {
   compareHands,
+  getAction,
   getBetsByPlayers,
   getHand,
   getShares,
@@ -18,6 +19,7 @@ export function startGame(game: GameState) {
   game.playerChips = Object.fromEntries(
     game.playerIds.map((id) => [id, startPlayerAmount])
   )
+  game.remainingPlayers = game.playerIds
   nextGame(game)
 }
 
@@ -32,14 +34,14 @@ export function nextGame(game: GameState) {
   game.round = 0
   game.roundWinners = {}
   game.step = Step.PLAY
-  game.turnIndex = game.playerIds.length === 2 ? 1 : 2
+  game.turnIndex = game.remainingPlayers.length === 2 ? 1 : 2
   game.winnerHands = []
   // Shuffle deck and deal 2 cards per players
   const deck = [...initialDeck]
   shuffleArray(deck)
-  const players = game.playerIds
+  const players = game.remainingPlayers
     .slice(game.dealerIndex + 1)
-    .concat(game.playerIds.slice(0, game.dealerIndex + 1))
+    .concat(game.remainingPlayers.slice(0, game.dealerIndex + 1))
   for (const i in players) {
     game.playerCards[i] = { cards: [deck.shift()!], id: players[i] }
   }
@@ -53,24 +55,25 @@ export function nextGame(game: GameState) {
   }
   let smallBlindPlayer = players[0]
   let bigBlindPlayer = players[1]
-  if (game.playerIds.length === 2) {
+  if (game.remainingPlayers.length === 2) {
     smallBlindPlayer = players[1]
     bigBlindPlayer = players[0]
   }
   game.bets = [
     {
-      amount: game.blind / 2,
+      ...getAction(
+        game.blind / 2,
+        0,
+        game.playerChips[smallBlindPlayer],
+        "smallBlind"
+      ),
       id: smallBlindPlayer,
-      raise: 0,
       round: 0,
-      type: "smallBlind",
     },
     {
-      amount: game.blind,
+      ...getAction(game.blind, 0, game.playerChips[bigBlindPlayer], "bigBlind"),
       id: bigBlindPlayer,
-      raise: 0,
       round: 0,
-      type: "bigBlind",
     },
   ]
   game.playerChips[smallBlindPlayer] -= game.blind / 2
@@ -124,11 +127,14 @@ export function winRound(game: GameState, winners: Record<string, number>) {
   for (const [id, amount] of Object.entries(game.roundWinners)) {
     game.playerChips[id] += amount
   }
+  game.remainingPlayers = Object.entries(game.playerChips)
+    .filter(([, amount]) => amount !== 0)
+    .map(([id]) => id)
 }
 
 export function endGame(game: GameState) {
   game.turnIndex = -1
-  game.dealerIndex = (game.dealerIndex + 1) % game.playerIds.length
+  game.dealerIndex = (game.dealerIndex + 1) % game.remainingPlayers.length
   game.roundWinners = {}
   game.winnerHands = []
   game.step = Step.ROUND_END

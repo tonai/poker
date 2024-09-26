@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 
+import { getAction } from "../helpers"
 import {
   blind,
   disableRaise,
@@ -14,7 +15,7 @@ import {
 import Amount from "./Amount.vue"
 import Chip from "./Chip.vue"
 
-type GroupedActionType = "allIn" | "checkOrCall" | "fold" | "raise"
+type GroupedActionType = "allIn" | "check" | "fold" | "raise"
 
 const checkOrCallBet = computed(
   () => maxRoundBet.value - (playerBets.value[playerId.value] ?? 0)
@@ -36,33 +37,18 @@ function select(type: GroupedActionType) {
 
 function confirm() {
   if (action.value) {
-    if (action.value === "checkOrCall") {
-      Dusk.actions.action({
-        type: checkOrCallBet.value === 0 ? "check" : "call",
-        amount: checkOrCallBet.value,
-      })
-    } else if (action.value === "raise") {
-      const amount = Math.min(
-        raiseValue.value + checkOrCallBet.value,
-        playerChips.value[playerId.value]
+    Dusk.actions.action(
+      getAction(
+        checkOrCallBet.value,
+        action.value === "raise"
+          ? raiseValue.value
+          : action.value === "allIn"
+            ? playerChips.value[playerId.value] - checkOrCallBet.value
+            : 0,
+        playerChips.value[playerId.value],
+        action.value
       )
-      Dusk.actions.action({
-        type: amount === playerChips.value[playerId.value] ? "allIn" : "raise",
-        amount: amount,
-        raise: amount - checkOrCallBet.value,
-      })
-    } else if (action.value === "allIn") {
-      Dusk.actions.action({
-        type: "allIn",
-        amount: playerChips.value[playerId.value],
-        raise: playerChips.value[playerId.value] - checkOrCallBet.value,
-      })
-    } else {
-      Dusk.actions.action({
-        type: "fold",
-        amount: 0,
-      })
-    }
+    )
     action.value = undefined
   }
 }
@@ -74,9 +60,9 @@ function confirm() {
       <button
         type="button"
         class="button"
-        :class="{ selected: action === 'checkOrCall' }"
+        :class="{ selected: action === 'check' }"
         :disabled="checkOrCallBet > playerChips[playerId]"
-        @click="select('checkOrCall')"
+        @click="select('check')"
       >
         {{ checkOrCallBet === 0 ? "Check" : "Call" }}
       </button>
@@ -122,7 +108,7 @@ function confirm() {
         <Chip class="chip" />
       </div>
       <Amount
-        v-if="action === 'checkOrCall'"
+        v-if="action === 'check'"
         class="checkOrCall"
         :amount="checkOrCallBet"
       />
