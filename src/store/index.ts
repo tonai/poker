@@ -35,6 +35,9 @@ export const skipPlayers = computed(() =>
 )
 export const otherPlayers = computed(() => {
   const index = playerIds.value.findIndex((id) => id === playerId.value)
+  if (index === -1) {
+    return playerIds.value
+  }
   return playerIds.value
     .slice(index + 1)
     .concat(playerIds.value.slice(0, index))

@@ -170,14 +170,14 @@ Dusk.initLogic({
       if (game.step === Step.WAIT) {
         game.playerIds.push(playerId)
       } else {
-        // Spectator (TODO)
+        // Spectator
       }
     },
     playerLeft(playerId, { game }) {
       if (game.step === Step.WAIT) {
         game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
       } else {
-        // If a player left during the game (TODO)
+        // If a player left during the game
       }
     },
   },

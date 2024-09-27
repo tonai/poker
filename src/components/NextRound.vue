@@ -38,23 +38,25 @@ function endRound() {
 </script>
 
 <template>
-  <div v-if="!playerOut" class="nextRound">
-    <button
-      type="button"
-      class="button endRound"
-      :class="{ selected: playersReady.includes(playerId) }"
-      @click="endRound"
-    >
-      Next round
-    </button>
-    <div class="playersReady">
-      <Avatar
-        v-for="id of playersReady"
-        :id="id"
-        :key="id"
-        class="playerReady"
-      />
-    </div>
+  <div class="nextRound">
+    <template v-if="!playerOut">
+      <button
+        type="button"
+        class="button endRound"
+        :class="{ selected: playersReady.includes(playerId) }"
+        @click="endRound"
+      >
+        Next round
+      </button>
+      <div class="playersReady">
+        <Avatar
+          v-for="id of playersReady"
+          :id="id"
+          :key="id"
+          class="playerReady"
+        />
+      </div>
+    </template>
     <div class="hand">{{ winningHand }}</div>
   </div>
 </template>
