@@ -1,6 +1,6 @@
 import vue from "@vitejs/plugin-vue"
-import dusk from "dusk-games-sdk/vite"
 import path from "node:path"
+import rune from "rune-sdk/vite"
 import { defineConfig } from "vite"
 import { qrcode } from "vite-plugin-qrcode"
 
@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     qrcode(), // only applies in dev mode
     vue(),
-    dusk({
+    rune({
       logicPath: path.resolve("./src/logic.ts"),
       minifyLogic: false, // This flag can be used if your logic reaches the allowed limit. However, it will make it significantly more difficult to detect validation issues
       ignoredDependencies: ["@tonai/game-utils/server"],

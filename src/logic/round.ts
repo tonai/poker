@@ -1,4 +1,5 @@
-import { shuffleArray } from "@tonai/game-utils/server"
+import { PlayerId } from "rune-sdk"
+import { modulo, shuffleArray } from "@tonai/game-utils/server"
 
 import { initialDeck, startPlayerAmount } from "../constants"
 import {
@@ -10,7 +11,7 @@ import {
   getSortedCards,
 } from "../helpers"
 import { GameState } from "../logic"
-import { Step } from "../types"
+import { Action, Step } from "../types"
 
 export function startGame(game: GameState) {
   // Start game
@@ -19,6 +20,9 @@ export function startGame(game: GameState) {
   game.playerChips = Object.fromEntries(
     game.playerIds.map((id) => [id, startPlayerAmount])
   )
+  // game.playerChips = Object.fromEntries(
+  //   game.playerIds.map((id, i) => [id, Math.floor(startPlayerAmount / (i + 1))])
+  // )
   game.remainingPlayers = game.playerIds
   nextGame(game)
 }
@@ -80,6 +84,83 @@ export function nextGame(game: GameState) {
   game.playerChips[bigBlindPlayer] -= game.blind
 }
 
+export function addAction(
+  game: GameState,
+  playerId: PlayerId,
+  action: Action
+  // left = false
+) {
+  game.bets.push({
+    amount: action.amount,
+    id: playerId,
+    raise: action.raise ?? 0,
+    round: game.round,
+    type: action.type,
+  })
+  game.playerChips[playerId] -= action.amount
+
+  // Player states (fold / all-in)
+  const playerStates = game.bets.reduce<Record<string, "allIn" | "fold">>(
+    (acc, { id, type }) => {
+      if (type === "fold" || type === "allIn") {
+        acc[id] = type
+      }
+      return acc
+    },
+    {}
+  )
+  const foldPlayers = Object.entries(playerStates)
+    .filter(([, type]) => type === "fold")
+    .map(([id]) => id)
+  const skipPlayers = Object.keys(playerStates)
+
+  if (foldPlayers.length === game.remainingPlayers.length - 1) {
+    // Everybody fold
+    const winner = game.remainingPlayers.find((id) => !foldPlayers.includes(id))
+    if (winner) {
+      const playerBets = getBetsByPlayers(game.bets)
+      winRound(game, getShares(playerBets, [winner]))
+    }
+    return
+  }
+
+  const roundBets = game.bets.filter(({ round }) => round === game.round)
+  const playerRoundBets = getBetsByPlayers(roundBets)
+  const maxRoundBet = Math.max(...Object.values(playerRoundBets))
+  const roundSkipPlayers = roundBets
+    .filter(({ type }) => type === "fold" || type === "allIn")
+    .map(({ id }) => id)
+  const playersIn = game.remainingPlayers.length - skipPlayers.length
+  const arePlayersNotBettingTheMax = Object.entries(playerRoundBets)
+    .filter(([id]) => !skipPlayers.includes(id))
+    .some(([, total]) => total !== maxRoundBet)
+
+  if (
+    (game.round === 0 && roundBets.length < game.remainingPlayers.length + 2) ||
+    roundBets.length < playersIn + roundSkipPlayers.length ||
+    arePlayersNotBettingTheMax
+  ) {
+    // console.log(
+    //   "before",
+    //   game.turnIndex,
+    //   left,
+    //   action.type !== "fold" && action.type !== "allIn",
+    //   playersIn
+    // )
+    // // Continue betting round
+    // if (left) {
+    //   game.turnIndex--
+    // }
+    if (action.type !== "fold" && action.type !== "allIn") {
+      game.turnIndex++
+    }
+    game.turnIndex = modulo(game.turnIndex, playersIn)
+  } else {
+    // Start next round
+    nextRound(game, foldPlayers)
+  }
+}
+
 export function nextRound(game: GameState, foldPlayers: string[]) {
   game.round++
   if (game.round === 4) {
@@ -135,10 +216,10 @@ export function winRound(game: GameState, winners: Record<string, number>) {
     game.playerChips[id] += amount
   }
   game.remainingPlayers = Object.entries(game.playerChips)
-    .filter(([, amount]) => amount !== 0)
+    .filter(([, amount]) => amount !== 0 /*&& !game.playersLeft.includes(id)*/)
     .map(([id]) => id)
   if (game.remainingPlayers.length === 1) {
-    Dusk.gameOver({
+    Rune.gameOver({
       players: Object.fromEntries(
         game.playerIds.map((id) => [
           id,
@@ -151,7 +232,7 @@ export function winRound(game: GameState, winners: Record<string, number>) {
 
 export function endGame(game: GameState) {
   game.turnIndex = -1
-  game.dealerIndex = (game.dealerIndex + 1) % game.remainingPlayers.length
+  game.dealerIndex = modulo(game.dealerIndex + 1, game.remainingPlayers.length)
   game.roundWinners = {}
   game.winnerHands = []
   game.step = Step.ROUND_END

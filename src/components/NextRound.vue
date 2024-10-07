@@ -33,7 +33,7 @@ const winningHand = computed(() => {
 })
 
 function endRound() {
-  Dusk.actions.endRound()
+  Rune.actions.endRound()
 }
 </script>
 

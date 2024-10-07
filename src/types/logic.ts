@@ -1,4 +1,4 @@
-import type { PlayerId } from "dusk-games-sdk/multiplayer"
+import type { PlayerId } from "rune-sdk"
 
 import { Cards, Hand } from "./card"
 

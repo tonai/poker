@@ -51,12 +51,10 @@ export const playerOrder = computed(() =>
     .concat(remainingPlayers.value.slice(0, dealerIndex.value + 1))
     .filter((id) => !skipPlayers.value.includes(id))
 )
-export const playerTurn = computed(() => {
-  return playerOrder.value[turnIndex.value]
-})
+export const playerTurn = computed(() => playerOrder.value[turnIndex.value])
 export const roundBets = computed(() =>
   bets.value.filter(
-    (bet) => bet.round === round.value && !foldPlayers.value.includes(bet.id)
+    (bet) => bet.round === round.value //&& !foldPlayers.value.includes(bet.id)
   )
 )
 export const playerBets = computed(() =>

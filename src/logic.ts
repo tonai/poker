@@ -1,15 +1,9 @@
-import type { PlayerId, DuskClient } from "dusk-games-sdk/multiplayer"
+import type { PlayerId, RuneClient } from "rune-sdk"
+// import { modulo } from "@tonai/game-utils/server"
 
 import { startBlind } from "./constants"
 import { Action, Bet, Cards, PlayerCards, Step, WinnerHand } from "./types"
-import {
-  endGame,
-  nextGame,
-  nextRound,
-  startGame,
-  winRound,
-} from "./logic/round"
-import { getBetsByPlayers, getShares } from "./helpers"
+import { addAction, endGame, nextGame, startGame } from "./logic/round"
 
 export interface GameState {
   bets: Bet[]
@@ -21,6 +15,7 @@ export interface GameState {
   playerCards: PlayerCards[]
   playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
+  // playersLeft: PlayerId[]
   playersReady: PlayerId[]
   remainingPlayers: PlayerId[]
   round: number
@@ -38,10 +33,10 @@ type GameActions = {
 }
 
 declare global {
-  const Dusk: DuskClient<GameState, GameActions>
+  const Rune: RuneClient<GameState, GameActions>
 }
 
-Dusk.initLogic({
+Rune.initLogic({
   minPlayers: 2,
   maxPlayers: 6,
   setup: (allPlayerIds) => ({
@@ -54,6 +49,7 @@ Dusk.initLogic({
     playerCards: [],
     playerChips: {},
     playerIds: allPlayerIds,
+    // playersLeft: [],
     playersReady: [],
     remainingPlayers: [],
     round: 0,
@@ -65,79 +61,22 @@ Dusk.initLogic({
   actions: {
     action(action, { game, playerId }) {
       if (game.step !== Step.PLAY) {
-        return Dusk.invalidAction()
+        return Rune.invalidAction()
       }
-      game.bets.push({
-        amount: action.amount,
-        id: playerId,
-        raise: action.raise ?? 0,
-        round: game.round,
-        type: action.type,
-      })
-      game.playerChips[playerId] -= action.amount
-
-      // Player states (fold / all-in)
-      const playerStates = game.bets.reduce<Record<string, "allIn" | "fold">>(
-        (acc, { id, type }) => {
-          if (type === "fold" || type === "allIn") {
-            acc[id] = type
-          }
-          return acc
-        },
-        {}
-      )
-      const foldPlayers = Object.entries(playerStates)
-        .filter(([, type]) => type === "fold")
-        .map(([id]) => id)
-      const skipPlayers = Object.keys(playerStates)
-
-      if (foldPlayers.length === game.remainingPlayers.length - 1) {
-        // Everybody fold
-        const winner = game.remainingPlayers.find(
-          (id) => !foldPlayers.includes(id)
-        )
-        if (winner) {
-          const playerBets = getBetsByPlayers(game.bets)
-          winRound(game, getShares(playerBets, [winner]))
-        }
-        return
-      }
-
-      const roundBets = game.bets.filter(({ round }) => round === game.round)
-      const playerRoundBets = getBetsByPlayers(roundBets)
-      const maxRoundBet = Math.max(...Object.values(playerRoundBets))
-      const roundSkipPlayers = roundBets
-        .filter(({ type }) => type === "fold" || type === "allIn")
-        .map(({ id }) => id)
-      const playersIn = game.remainingPlayers.length - skipPlayers.length
-      const arePlayersBettingTheMax = Object.entries(playerRoundBets)
-        .filter(([id]) => !skipPlayers.includes(id))
-        .some(([, total]) => total !== maxRoundBet)
-
-      if (
-        (game.round === 0 && roundBets.length < game.remainingPlayers.length + 2) ||
-        roundBets.length < playersIn + roundSkipPlayers.length ||
-        arePlayersBettingTheMax
-      ) {
-        // Continue betting round
-        if (action.type !== "fold" && action.type !== "allIn") {
-          game.turnIndex++
-        }
-        game.turnIndex = game.turnIndex % playersIn
-      } else {
-        // Start next round
-        nextRound(game, foldPlayers)
-      }
+      addAction(game, playerId, action)
     },
     endRound(_, { game, playerId }) {
       if (game.step !== Step.WIN) {
-        return Dusk.invalidAction()
+        return Rune.invalidAction()
       }
       const index = game.playersReady.indexOf(playerId)
       if (index !== -1) {
         game.playersReady.splice(index, 1)
       } else {
         game.playersReady.push(playerId)
+        // const remainingPlayers = game.remainingPlayers.filter((id) =>
+        //   game.playerIds.includes(id)
+        // )
         if (game.playersReady.length === game.remainingPlayers.length) {
           endGame(game)
         }
@@ -145,13 +84,13 @@ Dusk.initLogic({
     },
     nextRound(_, { game }) {
       if (game.step !== Step.ROUND_END) {
-        return Dusk.invalidAction()
+        return Rune.invalidAction()
       }
       nextGame(game)
     },
-    ready(_, { game, playerId }) {
+    ready(_, { game }) {
       if (game.step !== Step.WAIT) {
-        return Dusk.invalidAction()
+        return Rune.invalidAction()
       }
       startGame(game)
       /*const index = game.playersReady.indexOf(playerId)
@@ -176,9 +115,63 @@ Dusk.initLogic({
     playerLeft(playerId, { game }) {
       if (game.step === Step.WAIT) {
         game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
-      } else {
-        // If a player left during the game
       }
+      /*
+      else if (game.remainingPlayers.includes(playerId)) {
+        // If a player left during the game
+        const foldPlayers = game.bets
+          .filter(({ type }) => type === "fold")
+          .map(({ id }) => id)
+        const playerOrder = game.remainingPlayers
+          .slice(game.dealerIndex + 1)
+          .concat(game.remainingPlayers.slice(0, game.dealerIndex + 1))
+          .filter((id) => !foldPlayers.includes(id))
+        const leftOutsideHisTurn = playerId !== playerOrder[game.turnIndex]
+        // If a was the dealer
+        if (game.remainingPlayers[game.dealerIndex] === playerId) {
+          game.dealerIndex = modulo(
+            game.dealerIndex - 1,
+            game.remainingPlayers.length - 1
+          )
+        }
+        // Remove player
+        game.playersLeft.push(playerId)
+        game.remainingPlayers = game.remainingPlayers.filter(
+          (id) => id !== playerId
+        )
+        // Compute new turnIndex
+        const skipPlayers = game.bets
+          .filter(({ type }) => type === "fold" || type === "allIn")
+          .map(({ id }) => id)
+        const playersIn = game.remainingPlayers.length - skipPlayers.length
+        game.turnIndex = modulo(
+          leftOutsideHisTurn ? game.turnIndex - 1 : game.turnIndex,
+          playersIn
+        )
+        // Insert a fold action
+        // addAction(
+        //   game,
+        //   playerId,
+        //   {
+        //     amount: 0,
+        //     raise: 0,
+        //     type: "fold",
+        //   },
+        //   leftOutsideHisTurn
+        // )
+        // Game over if there is only one remaining player
+        if (game.remainingPlayers.length === 1) {
+          Rune.gameOver({
+            players: Object.fromEntries(
+              game.playerIds.map((id) => [
+                id,
+                id !== game.remainingPlayers[0] ? "LOST" : "WON",
+              ])
+            ),
+          })
+        }
+      }
+      */
     },
   },
 })

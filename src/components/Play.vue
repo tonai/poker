@@ -81,7 +81,7 @@ watch(round, () => (canPlay.value = false))
 watch(step, () => {
   if (step.value === Step.ROUND_END) {
     const time = 1000 + randomInt(1000, 500)
-    setTimeout(() => Dusk.actions.nextRound(), time)
+    setTimeout(() => Rune.actions.nextRound(), time)
   }
 })
 </script>

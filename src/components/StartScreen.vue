@@ -2,7 +2,7 @@
 import { playerId, playersReady } from "../store"
 
 function ready() {
-  Dusk.actions.ready()
+  Rune.actions.ready()
 }
 </script>
 

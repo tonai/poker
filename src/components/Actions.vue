@@ -37,7 +37,7 @@ function select(type: GroupedActionType) {
 
 function confirm() {
   if (action.value) {
-    Dusk.actions.action(
+    Rune.actions.action(
       getAction(
         checkOrCallBet.value,
         action.value === "raise"

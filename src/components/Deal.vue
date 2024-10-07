@@ -158,6 +158,39 @@ watch(step, () => {
     })
   }
 })
+
+// Player join/left
+// watch(
+//   playerIds,
+//   () => {
+//     deal.value.forEach((card, index) => {
+//       if (
+//         playerIds.value.includes(card.id) &&
+//         !discardIds.value.includes(card.id)
+//       ) {
+//         // Update position
+//         dealCardPositions.value[index].left =
+//           props.playerCardPositions[card.id].left
+//         dealCardPositions.value[index].top =
+//           props.playerCardPositions[card.id].top
+//       } else {
+//         // Discard
+//         dealCardPositions.value[index].translate = "-50% 0"
+//         dealCardPositions.value[index].left = "var(--left)"
+//         dealCardPositions.value[index].top = "var(--top2)"
+//         dealCardPositions.value[index].scale = 0.5
+//       }
+//     })
+//     communityCardPositions.value.forEach((card) => {
+//       if (card.flipped && card.scale !== 0.5) {
+//         // Update start position
+//         card.left = props.playerPositions[dealerId.value].left
+//         card.top = props.playerPositions[dealerId.value].top
+//       }
+//     })
+//   },
+//   { flush: "post" }
+// )
 </script>
 
 <template>
