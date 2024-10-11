@@ -25,7 +25,7 @@ export interface GameState {
   winnerHands: WinnerHand[]
 }
 
-type GameActions = {
+export type GameActions = {
   action: (action: Action) => void
   endRound: () => void
   nextRound: () => void
@@ -33,7 +33,8 @@ type GameActions = {
 }
 
 declare global {
-  const Rune: RuneClient<GameState, GameActions>
+  // eslint-disable-next-line no-var
+  var Rune: RuneClient<GameState, GameActions>
 }
 
 Rune.initLogic({
@@ -93,6 +94,7 @@ Rune.initLogic({
         return Rune.invalidAction()
       }
       startGame(game)
+      nextGame(game)
       /*const index = game.playersReady.indexOf(playerId)
       if (index !== -1) {
         game.playersReady.splice(index, 1)

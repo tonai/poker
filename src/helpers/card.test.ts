@@ -7,6 +7,7 @@ import {
   compareRanks,
   getHand,
   getRank,
+  getSortedCards,
   getSortedRank,
 } from "./card"
 
@@ -32,6 +33,24 @@ describe("Card helper", () => {
       expect(getSortedRank("Q")).toEqual(12)
       expect(getSortedRank("K")).toEqual(13)
       expect(getSortedRank(1)).toEqual(14)
+    })
+  })
+
+  describe("getSortedCards", () => {
+    it("should return sorted cards", () => {
+      expect(
+        getSortedCards([
+          { suit: "♣", rank: "J" },
+          { suit: "♥", rank: "K" },
+          { suit: "♠", rank: 1 },
+          { suit: "♥", rank: 5 },
+        ])
+      ).toEqual([
+        { suit: "♣", rank: 11 },
+        { suit: "♥", rank: 13 },
+        { suit: "♠", rank: 14 },
+        { suit: "♥", rank: 5 },
+      ])
     })
   })
 

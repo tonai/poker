@@ -24,7 +24,6 @@ export function startGame(game: GameState) {
   //   game.playerIds.map((id, i) => [id, Math.floor(startPlayerAmount / (i + 1))])
   // )
   game.remainingPlayers = game.playerIds
-  nextGame(game)
 }
 
 export function nextGame(game: GameState) {

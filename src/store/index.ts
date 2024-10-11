@@ -1,7 +1,7 @@
 import { computed, ref } from "vue"
 
 import { startBlind } from "../constants"
-import { getRank } from "../helpers"
+import { getPlayerOrder, getRank } from "../helpers"
 import { Bet, Cards, PlayerCards, Step, WinnerHand } from "../types"
 
 export const bets = ref<Bet[]>([])
@@ -46,10 +46,7 @@ export const dealerId = computed(
   () => remainingPlayers.value[dealerIndex.value]
 )
 export const playerOrder = computed(() =>
-  remainingPlayers.value
-    .slice(dealerIndex.value + 1)
-    .concat(remainingPlayers.value.slice(0, dealerIndex.value + 1))
-    .filter((id) => !skipPlayers.value.includes(id))
+  getPlayerOrder(remainingPlayers.value, dealerIndex.value, skipPlayers.value)
 )
 export const playerTurn = computed(() => playerOrder.value[turnIndex.value])
 export const roundBets = computed(() =>

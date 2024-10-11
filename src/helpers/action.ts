@@ -19,6 +19,6 @@ export function getAction(
   return {
     type,
     amount,
-    raise: amount - checkAmount,
+    raise: Math.max(amount - checkAmount, 0),
   }
 }
