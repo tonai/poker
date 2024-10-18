@@ -8,3 +8,7 @@ export function getPlayerOrder(
     .concat(players.slice(0, dealerIndex + 1))
     .filter((id) => !skipPlayers.includes(id))
 }
+
+export function getDealerId(remainingPlayers: string[], dealerIndex: number) {
+  return remainingPlayers[dealerIndex]
+}

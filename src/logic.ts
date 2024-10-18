@@ -1,9 +1,9 @@
 import type { PlayerId, RuneClient } from "rune-sdk"
-// import { modulo } from "@tonai/game-utils/server"
 
 import { startBlind } from "./constants"
 import { Action, Bet, Cards, PlayerCards, Step, WinnerHand } from "./types"
 import { addAction, endGame, nextGame, startGame } from "./logic/round"
+import { playerLeft } from "./logic/events"
 
 export interface GameState {
   bets: Bet[]
@@ -15,7 +15,7 @@ export interface GameState {
   playerCards: PlayerCards[]
   playerChips: Record<PlayerId, number>
   playerIds: PlayerId[]
-  // playersLeft: PlayerId[]
+  playersLeft: PlayerId[]
   playersReady: PlayerId[]
   remainingPlayers: PlayerId[]
   round: number
@@ -50,7 +50,7 @@ Rune.initLogic({
     playerCards: [],
     playerChips: {},
     playerIds: allPlayerIds,
-    // playersLeft: [],
+    playersLeft: [],
     playersReady: [],
     remainingPlayers: [],
     round: 0,
@@ -75,9 +75,6 @@ Rune.initLogic({
         game.playersReady.splice(index, 1)
       } else {
         game.playersReady.push(playerId)
-        // const remainingPlayers = game.remainingPlayers.filter((id) =>
-        //   game.playerIds.includes(id)
-        // )
         if (game.playersReady.length === game.remainingPlayers.length) {
           endGame(game)
         }
@@ -117,63 +114,9 @@ Rune.initLogic({
     playerLeft(playerId, { game }) {
       if (game.step === Step.WAIT) {
         game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
+      } else {
+        playerLeft(game, playerId)
       }
-      /*
-      else if (game.remainingPlayers.includes(playerId)) {
-        // If a player left during the game
-        const foldPlayers = game.bets
-          .filter(({ type }) => type === "fold")
-          .map(({ id }) => id)
-        const playerOrder = game.remainingPlayers
-          .slice(game.dealerIndex + 1)
-          .concat(game.remainingPlayers.slice(0, game.dealerIndex + 1))
-          .filter((id) => !foldPlayers.includes(id))
-        const leftOutsideHisTurn = playerId !== playerOrder[game.turnIndex]
-        // If a was the dealer
-        if (game.remainingPlayers[game.dealerIndex] === playerId) {
-          game.dealerIndex = modulo(
-            game.dealerIndex - 1,
-            game.remainingPlayers.length - 1
-          )
-        }
-        // Remove player
-        game.playersLeft.push(playerId)
-        game.remainingPlayers = game.remainingPlayers.filter(
-          (id) => id !== playerId
-        )
-        // Compute new turnIndex
-        const skipPlayers = game.bets
-          .filter(({ type }) => type === "fold" || type === "allIn")
-          .map(({ id }) => id)
-        const playersIn = game.remainingPlayers.length - skipPlayers.length
-        game.turnIndex = modulo(
-          leftOutsideHisTurn ? game.turnIndex - 1 : game.turnIndex,
-          playersIn
-        )
-        // Insert a fold action
-        // addAction(
-        //   game,
-        //   playerId,
-        //   {
-        //     amount: 0,
-        //     raise: 0,
-        //     type: "fold",
-        //   },
-        //   leftOutsideHisTurn
-        // )
-        // Game over if there is only one remaining player
-        if (game.remainingPlayers.length === 1) {
-          Rune.gameOver({
-            players: Object.fromEntries(
-              game.playerIds.map((id) => [
-                id,
-                id !== game.remainingPlayers[0] ? "LOST" : "WON",
-              ])
-            ),
-          })
-        }
-      }
-      */
     },
   },
 })

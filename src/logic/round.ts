@@ -83,12 +83,7 @@ export function nextGame(game: GameState) {
   game.playerChips[bigBlindPlayer] -= game.blind
 }
 
-export function addAction(
-  game: GameState,
-  playerId: PlayerId,
-  action: Action
-  // left = false
-) {
+export function addAction(game: GameState, playerId: PlayerId, action: Action) {
   game.bets.push({
     amount: action.amount,
     id: playerId,
@@ -101,7 +96,10 @@ export function addAction(
   // Player states (fold / all-in)
   const playerStates = game.bets.reduce<Record<string, "allIn" | "fold">>(
     (acc, { id, type }) => {
-      if (type === "fold" || type === "allIn") {
+      if (
+        game.remainingPlayers.includes(id) &&
+        (type === "fold" || type === "allIn")
+      ) {
         acc[id] = type
       }
       return acc
@@ -123,40 +121,44 @@ export function addAction(
     return
   }
 
-  const roundBets = game.bets.filter(({ round }) => round === game.round)
-  const playerRoundBets = getBetsByPlayers(roundBets)
-  const maxRoundBet = Math.max(...Object.values(playerRoundBets))
-  const roundSkipPlayers = roundBets
-    .filter(({ type }) => type === "fold" || type === "allIn")
-    .map(({ id }) => id)
+  // const roundBets = game.bets.filter(({ round }) => round === game.round)
+  // const playerRoundBets = getBetsByPlayers(roundBets)
+  // const maxRoundBet = Math.max(...Object.values(playerRoundBets))
+  // const roundSkipPlayers = roundBets
+  //   .filter(({ type }) => type === "fold" || type === "allIn")
+  //   .map(({ id }) => id)
+  // const playersIn = game.remainingPlayers.length - skipPlayers.length
+  // const arePlayersNotBettingTheMax = Object.entries(playerRoundBets)
+  //   .filter(([id]) => !skipPlayers.includes(id))
+  //   .some(([, total]) => total !== maxRoundBet)
+
   const playersIn = game.remainingPlayers.length - skipPlayers.length
-  const arePlayersNotBettingTheMax = Object.entries(playerRoundBets)
+  const roundBets = game.bets.filter(
+    ({ id, round, type }) =>
+      round === game.round &&
+      (game.remainingPlayers.includes(id) ||
+        type === "bigBlind" ||
+        type === "smallBlind")
+  )
+  const playerRoundBets = getBetsByPlayers(
+    roundBets.filter(({ id }) => game.remainingPlayers.includes(id))
+  )
+  const maxRoundBet = Math.max(...Object.values(playerRoundBets))
+  const arePlayersAllBettingTheMax = !Object.entries(playerRoundBets)
     .filter(([id]) => !skipPlayers.includes(id))
     .some(([, total]) => total !== maxRoundBet)
+  const everyoneAsSpoken =
+    (game.round !== 0 && roundBets.length >= playersIn) ||
+    (game.round === 0 && roundBets.length >= game.remainingPlayers.length + 2)
 
-  if (
-    (game.round === 0 && roundBets.length < game.remainingPlayers.length + 2) ||
-    roundBets.length < playersIn + roundSkipPlayers.length ||
-    arePlayersNotBettingTheMax
-  ) {
-    // console.log(
-    //   "before",
-    //   game.turnIndex,
-    //   left,
-    //   action.type !== "fold" && action.type !== "allIn",
-    //   playersIn
-    // )
-    // // Continue betting round
-    // if (left) {
-    //   game.turnIndex--
-    // }
+  if (everyoneAsSpoken && arePlayersAllBettingTheMax) {
+    // Start next round
+    nextRound(game, foldPlayers)
+  } else {
     if (action.type !== "fold" && action.type !== "allIn") {
       game.turnIndex++
     }
     game.turnIndex = modulo(game.turnIndex, playersIn)
-  } else {
-    // Start next round
-    nextRound(game, foldPlayers)
   }
 }
 
@@ -215,7 +217,7 @@ export function winRound(game: GameState, winners: Record<string, number>) {
     game.playerChips[id] += amount
   }
   game.remainingPlayers = Object.entries(game.playerChips)
-    .filter(([, amount]) => amount !== 0 /*&& !game.playersLeft.includes(id)*/)
+    .filter(([id, amount]) => amount !== 0 && !game.playersLeft.includes(id))
     .map(([id]) => id)
   if (game.remainingPlayers.length === 1) {
     Rune.gameOver({

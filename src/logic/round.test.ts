@@ -1,4 +1,5 @@
 import { describe, expect, it, Mock, vi } from "vitest"
+import { RuneClient } from "rune-sdk"
 
 import { initialDeck } from "../constants"
 import { getPlayerOrder } from "../helpers"
@@ -13,7 +14,6 @@ import {
   startGame,
   winRound,
 } from "./round"
-import { RuneClient } from "rune-sdk"
 
 globalThis.Rune = {
   gameOver: vi.fn(),
@@ -42,6 +42,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 1000, b: 990, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -166,6 +167,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 1000, b: 990, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -231,6 +233,63 @@ describe("Round logic", () => {
       expect(state.turnIndex).toEqual(-1)
       expect(state.winnerHands).toEqual([])
     })
+
+    it("should add fold actions and end the current game (one player left)", () => {
+      // Init
+      const deck = [...initialDeck]
+      const playerCards = [
+        { id: "b", cards: [deck.shift()!, deck.shift()!] },
+        { id: "c", cards: [deck.shift()!, deck.shift()!] },
+        { id: "a", cards: [deck.shift()!, deck.shift()!] },
+      ]
+      const state: GameState = {
+        bets: [
+          { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
+          { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
+        ],
+        blind: 10,
+        communityCards: [],
+        dealerIndex: 0,
+        deck,
+        game: 0,
+        playerCards,
+        playerChips: { a: 1000, b: 990, c: 980 },
+        playerIds: ["a", "c"],
+        playersLeft: ["b"],
+        playersReady: [],
+        remainingPlayers: ["a", "c"],
+        round: 0,
+        roundWinners: {},
+        step: Step.PLAY,
+        turnIndex: 1,
+        winnerHands: [],
+      }
+      // "a" fold
+      addAction(state, "a", { amount: 0, raise: 0, type: "fold" })
+      expect(state.bets).toEqual([
+        { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
+        { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
+        { amount: 0, id: "a", raise: 0, round: 0, type: "fold" },
+      ])
+      expect(state.communityCards.length).toEqual(0)
+      expect(state.dealerIndex).toEqual(0)
+      expect(state.deck.length).toEqual(52 - 2 - 2 - 2)
+      expect(state.game).toEqual(0)
+      expect(state.playerCards[0].id).toEqual("b")
+      expect(state.playerCards[0].cards.length).toEqual(2)
+      expect(state.playerCards[1].id).toEqual("c")
+      expect(state.playerCards[1].cards.length).toEqual(2)
+      expect(state.playerCards[2].id).toEqual("a")
+      expect(state.playerCards[2].cards.length).toEqual(2)
+      expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
+      expect(state.playersReady).toEqual([])
+      expect(state.remainingPlayers).toEqual(["a", "c"])
+      expect(state.round).toEqual(0)
+      expect(state.roundWinners).toEqual({ c: 30 })
+      expect(state.step).toEqual(Step.WIN)
+      expect(state.turnIndex).toEqual(-1)
+      expect(state.winnerHands).toEqual([])
+    })
   })
 
   describe("endGame", () => {
@@ -262,6 +321,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 1000, b: 990, c: 1010 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -291,6 +351,7 @@ describe("Round logic", () => {
         playerCards: [],
         playerChips: { a: 1000, b: 1000 },
         playerIds: ["a", "b"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b"],
         round: 0,
@@ -339,6 +400,7 @@ describe("Round logic", () => {
         playerCards: [],
         playerChips: { a: 1000, b: 1000, c: 1000 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -403,6 +465,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -465,6 +528,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 1,
@@ -532,6 +596,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 2,
@@ -604,6 +669,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 3,
@@ -656,6 +722,7 @@ describe("Round logic", () => {
         playerCards,
         playerChips: { a: 0, b: 0, c: 0 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -701,6 +768,7 @@ describe("Round logic", () => {
         playerCards: [],
         playerChips: {},
         playerIds: ["a", "b"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: [],
         round: 0,
@@ -739,13 +807,14 @@ describe("Round logic", () => {
           { amount: 0, id: "b", raise: 0, round: 0, type: "fold" },
         ],
         blind: 10,
-        communityCards: [],
+        communityCards,
         dealerIndex: 0,
         deck,
         game: 0,
         playerCards,
         playerChips: { a: 1000, b: 990, c: 980 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -757,6 +826,49 @@ describe("Round logic", () => {
       winRound(state, { c: 30 })
       expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
       expect(state.remainingPlayers).toEqual(["a", "b", "c"])
+      expect(state.roundWinners).toEqual({ c: 30 })
+      expect(state.step).toEqual(Step.WIN)
+      expect(state.turnIndex).toEqual(-1)
+    })
+
+    it("should win the round (one player left the game)", () => {
+      const deck = [...initialDeck]
+      const playerCards = [
+        { id: "b", cards: [deck.shift()!, deck.shift()!] },
+        { id: "c", cards: [deck.shift()!, deck.shift()!] },
+      ]
+      deck.shift()!
+      const communityCards = [deck.shift()!, deck.shift()!, deck.shift()!]
+      deck.shift()!
+      communityCards.push(deck.shift()!)
+      deck.shift()!
+      communityCards.push(deck.shift()!)
+      const state: GameState = {
+        bets: [
+          { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
+          { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
+          { amount: 0, id: "b", raise: 0, round: 0, type: "fold" },
+        ],
+        blind: 10,
+        communityCards,
+        dealerIndex: 0,
+        deck,
+        game: 0,
+        playerCards,
+        playerChips: { a: 1000, b: 990, c: 980 },
+        playerIds: ["b", "c"],
+        playersLeft: ["a"],
+        playersReady: [],
+        remainingPlayers: ["b", "c"],
+        round: 0,
+        roundWinners: {},
+        step: Step.PLAY,
+        turnIndex: 1,
+        winnerHands: [],
+      }
+      winRound(state, { c: 30 })
+      expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
+      expect(state.remainingPlayers).toEqual(["b", "c"])
       expect(state.roundWinners).toEqual({ c: 30 })
       expect(state.step).toEqual(Step.WIN)
       expect(state.turnIndex).toEqual(-1)
@@ -784,13 +896,14 @@ describe("Round logic", () => {
           { amount: 980, id: "c", raise: 0, round: 0, type: "allIn" },
         ],
         blind: 10,
-        communityCards: [],
+        communityCards,
         dealerIndex: 0,
         deck,
         game: 0,
         playerCards,
         playerChips: { a: 0, b: 0, c: 0 },
         playerIds: ["a", "b", "c"],
+        playersLeft: [],
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,

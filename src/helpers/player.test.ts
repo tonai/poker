@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { getPlayerOrder } from "./player"
+import { getDealerId, getPlayerOrder } from "./player"
 
 describe("Player helper", () => {
   describe("getPlayerOrder", () => {
@@ -36,6 +36,14 @@ describe("Player helper", () => {
         "d",
         "e",
       ])
+    })
+  })
+
+  describe("getDealerId", () => {
+    it("toto", () => {
+      expect(getDealerId(["a", "b", "c"], 0)).toEqual("a")
+      expect(getDealerId(["a", "b", "c"], 1)).toEqual("b")
+      expect(getDealerId(["a", "b", "c"], 2)).toEqual("c")
     })
   })
 })
