@@ -1,9 +1,9 @@
 import { describe, expect, it, Mock, vi } from "vitest"
-import { RuneClient } from "rune-sdk"
+import { GameStateWithPersisted, RuneClient } from "rune-sdk"
 
 import { initialDeck } from "../constants"
 import { getPlayerOrder } from "../helpers"
-import { GameActions, GameState } from "../logic"
+import { GameActions, GameState, Persisted } from "../logic"
 import { Step } from "../types"
 
 import {
@@ -17,7 +17,7 @@ import {
 
 globalThis.Rune = {
   gameOver: vi.fn(),
-} as unknown as RuneClient<GameState, GameActions>
+} as unknown as RuneClient<GameState, GameActions, Persisted>
 
 describe("Round logic", () => {
   describe("addAction", () => {
@@ -39,10 +39,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 1000, b: 990, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -164,10 +166,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 1000, b: 990, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -252,10 +256,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
-        playerChips: { a: 1000, b: 990, c: 980 },
+        playerChips: { a: 1000, c: 980 },
         playerIds: ["a", "c"],
-        playersLeft: ["b"],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "c"],
         round: 0,
@@ -281,7 +287,7 @@ describe("Round logic", () => {
       expect(state.playerCards[1].cards.length).toEqual(2)
       expect(state.playerCards[2].id).toEqual("a")
       expect(state.playerCards[2].cards.length).toEqual(2)
-      expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
+      expect(state.playerChips).toEqual({ a: 1000, c: 1010 })
       expect(state.playersReady).toEqual([])
       expect(state.remainingPlayers).toEqual(["a", "c"])
       expect(state.round).toEqual(0)
@@ -306,7 +312,7 @@ describe("Round logic", () => {
       communityCards.push(deck.shift()!)
       deck.shift()!
       communityCards.push(deck.shift()!)
-      const state: GameState = {
+      const state: GameStateWithPersisted<GameState, Persisted> = {
         bets: [
           { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
           { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -318,10 +324,13 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
+        persisted: {},
         playerCards,
         playerChips: { a: 1000, b: 990, c: 1010 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -332,6 +341,64 @@ describe("Round logic", () => {
       }
       endGame(state)
       expect(state.dealerIndex).toEqual(1)
+      expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
+      expect(state.playerIds).toEqual(["a", "b", "c"])
+      expect(state.playersJoined).toEqual([])
+      expect(state.playersOrder).toEqual({ a: 0, b: 1, c: 2 })
+      expect(state.remainingPlayers).toEqual(["a", "b", "c"])
+      expect(state.roundWinners).toEqual({})
+      expect(state.step).toEqual(Step.ROUND_END)
+      expect(state.turnIndex).toEqual(-1)
+      expect(state.winnerHands).toEqual([])
+    })
+
+    it("should add back player who joined", () => {
+      const deck = [...initialDeck]
+      const playerCards = [
+        { id: "b", cards: [deck.shift()!, deck.shift()!] },
+        { id: "c", cards: [deck.shift()!, deck.shift()!] },
+        { id: "a", cards: [deck.shift()!, deck.shift()!] },
+      ]
+      deck.shift()!
+      const communityCards = [deck.shift()!, deck.shift()!, deck.shift()!]
+      deck.shift()!
+      communityCards.push(deck.shift()!)
+      deck.shift()!
+      communityCards.push(deck.shift()!)
+      const state: GameStateWithPersisted<GameState, Persisted> = {
+        bets: [
+          { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
+          { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
+          { amount: 0, id: "a", raise: 0, round: 0, type: "fold" },
+          { amount: 0, id: "b", raise: 0, round: 0, type: "fold" },
+        ],
+        blind: 10,
+        communityCards: [],
+        dealerIndex: 0,
+        deck,
+        game: 0,
+        id: "42",
+        persisted: { bb: { chips: 990, gameId: "42", order: 1 } },
+        playerCards,
+        playerChips: { a: 1000, c: 1010 },
+        playerIds: ["a", "c"],
+        playersJoined: ["bb"],
+        playersOrder: { a: 0, c: 2 },
+        playersReady: [],
+        remainingPlayers: ["a", "c"],
+        round: 0,
+        roundWinners: { c: 30 },
+        step: Step.WIN,
+        turnIndex: -1,
+        winnerHands: [],
+      }
+      endGame(state)
+      expect(state.dealerIndex).toEqual(1)
+      expect(state.playerChips).toEqual({ a: 1000, bb: 990, c: 1010 })
+      expect(state.playerIds).toEqual(["a", "bb", "c"])
+      expect(state.playersJoined).toEqual([])
+      expect(state.playersOrder).toEqual({ a: 0, bb: 1, c: 2 })
+      expect(state.remainingPlayers).toEqual(["a", "bb", "c"])
       expect(state.roundWinners).toEqual({})
       expect(state.step).toEqual(Step.ROUND_END)
       expect(state.turnIndex).toEqual(-1)
@@ -348,10 +415,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck: [],
         game: -1,
+        id: "42",
         playerCards: [],
         playerChips: { a: 1000, b: 1000 },
         playerIds: ["a", "b"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b"],
         round: 0,
@@ -397,10 +466,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck: [],
         game: -1,
+        id: "42",
         playerCards: [],
         playerChips: { a: 1000, b: 1000, c: 1000 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -462,10 +533,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -525,10 +598,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 1,
@@ -593,10 +668,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 2,
@@ -666,10 +743,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 980, b: 980, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 3,
@@ -719,10 +798,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 0, b: 0, c: 0 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -765,10 +846,12 @@ describe("Round logic", () => {
         dealerIndex: -1,
         deck: [],
         game: -1,
+        id: "42",
         playerCards: [],
         playerChips: {},
         playerIds: ["a", "b"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: {},
         playersReady: [],
         remainingPlayers: [],
         round: 0,
@@ -781,6 +864,7 @@ describe("Round logic", () => {
       expect(state.game).toEqual(-1)
       expect(state.dealerIndex).toEqual(0)
       expect(state.playerChips).toEqual({ a: 1000, b: 1000 })
+      expect(state.playersOrder).toEqual({ a: 0, b: 1 })
       expect(state.remainingPlayers).toEqual(["a", "b"])
     })
   })
@@ -811,10 +895,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 1000, b: 990, c: 980 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,
@@ -854,10 +940,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
-        playerChips: { a: 1000, b: 990, c: 980 },
+        playerChips: { b: 990, c: 980 },
         playerIds: ["b", "c"],
-        playersLeft: ["a"],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["b", "c"],
         round: 0,
@@ -867,7 +955,7 @@ describe("Round logic", () => {
         winnerHands: [],
       }
       winRound(state, { c: 30 })
-      expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
+      expect(state.playerChips).toEqual({ b: 990, c: 1010 })
       expect(state.remainingPlayers).toEqual(["b", "c"])
       expect(state.roundWinners).toEqual({ c: 30 })
       expect(state.step).toEqual(Step.WIN)
@@ -900,10 +988,12 @@ describe("Round logic", () => {
         dealerIndex: 0,
         deck,
         game: 0,
+        id: "42",
         playerCards,
         playerChips: { a: 0, b: 0, c: 0 },
         playerIds: ["a", "b", "c"],
-        playersLeft: [],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2 },
         playersReady: [],
         remainingPlayers: ["a", "b", "c"],
         round: 0,

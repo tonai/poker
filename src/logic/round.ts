@@ -1,4 +1,4 @@
-import { PlayerId } from "rune-sdk"
+import { GameStateWithPersisted, PlayerId } from "rune-sdk"
 import { modulo, shuffleArray } from "@tonai/game-utils/server"
 
 import { initialDeck, startPlayerAmount } from "../constants"
@@ -10,7 +10,7 @@ import {
   getShares,
   getSortedCards,
 } from "../helpers"
-import { GameState } from "../logic"
+import { GameState, Persisted } from "../logic"
 import { Action, Step } from "../types"
 
 export function startGame(game: GameState) {
@@ -24,6 +24,7 @@ export function startGame(game: GameState) {
   //   game.playerIds.map((id, i) => [id, Math.floor(startPlayerAmount / (i + 1))])
   // )
   game.remainingPlayers = game.playerIds
+  game.playersOrder = Object.fromEntries(game.playerIds.map((id, i) => [id, i]))
 }
 
 export function nextGame(game: GameState) {
@@ -217,7 +218,7 @@ export function winRound(game: GameState, winners: Record<string, number>) {
     game.playerChips[id] += amount
   }
   game.remainingPlayers = Object.entries(game.playerChips)
-    .filter(([id, amount]) => amount !== 0 && !game.playersLeft.includes(id))
+    .filter(([, amount]) => amount !== 0)
     .map(([id]) => id)
   if (game.remainingPlayers.length === 1) {
     Rune.gameOver({
@@ -231,7 +232,27 @@ export function winRound(game: GameState, winners: Record<string, number>) {
   }
 }
 
-export function endGame(game: GameState) {
+export function endGame(game: GameStateWithPersisted<GameState, Persisted>) {
+  if (game.playersJoined.length > 0) {
+    for (const playerId of game.playersJoined) {
+      const { chips, order } = game.persisted[playerId]
+      if (chips !== undefined && order !== undefined) {
+        game.playerChips[playerId] = chips
+        game.playersOrder[playerId] = order
+        game.playerIds.push(playerId)
+        game.playerIds.sort(
+          (a, b) => game.playersOrder[a] - game.playersOrder[b]
+        )
+        if (chips > 0) {
+          game.remainingPlayers.push(playerId)
+          game.remainingPlayers.sort(
+            (a, b) => game.playersOrder[a] - game.playersOrder[b]
+          )
+        }
+      }
+    }
+    game.playersJoined = []
+  }
   game.turnIndex = -1
   game.dealerIndex = modulo(game.dealerIndex + 1, game.remainingPlayers.length)
   game.roundWinners = {}

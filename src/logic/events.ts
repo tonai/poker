@@ -1,14 +1,19 @@
-import { PlayerId } from "rune-sdk"
+import { GameStateWithPersisted, PlayerId } from "rune-sdk"
 import { modulo } from "@tonai/game-utils/server"
 
 import { getBetsByPlayers, getPlayerOrder } from "../helpers"
-import { GameState } from "../logic"
+import { GameState, Persisted } from "../logic"
 import { Step } from "../types"
 import { nextRound } from "./round"
 
-export function playerLeft(game: GameState, playerId: PlayerId) {
+export function playerLeft(
+  game: GameStateWithPersisted<GameState, Persisted>,
+  playerId: PlayerId
+) {
   game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
   if (!game.remainingPlayers.includes(playerId)) {
+    delete game.playerChips[playerId]
+    delete game.playersOrder[playerId]
     return
   }
 
@@ -32,9 +37,18 @@ export function playerLeft(game: GameState, playerId: PlayerId) {
     )
   }
 
-  // Remove player
-  game.playersLeft.push(playerId)
+  // Remove player and update persisted data
   game.remainingPlayers = game.remainingPlayers.filter((id) => id !== playerId)
+  if (game.playerChips[playerId] !== 0) {
+    if (!game.persisted[playerId]) {
+      game.persisted[playerId] = {}
+    }
+    game.persisted[playerId].gameId = game.id
+    game.persisted[playerId].chips = game.playerChips[playerId]
+    game.persisted[playerId].order = game.playersOrder[playerId]
+  }
+  delete game.playerChips[playerId]
+  delete game.playersOrder[playerId]
 
   // Compute new turnIndex
   const skipPlayers = game.bets
@@ -60,18 +74,6 @@ export function playerLeft(game: GameState, playerId: PlayerId) {
       // Nothing to do
     }
   }
-
-  // Insert a fold action
-  // addAction(
-  //   game,
-  //   playerId,
-  //   {
-  //     amount: 0,
-  //     raise: 0,
-  //     type: "fold",
-  //   },
-  //   leftOutsideHisTurn
-  // )
 
   // Game over if there is only one remaining player
   if (game.remainingPlayers.length === 1) {
@@ -109,5 +111,15 @@ export function playerLeft(game: GameState, playerId: PlayerId) {
     arePlayersAllBettingTheMax
   ) {
     nextRound(game, foldPlayers)
+  }
+}
+
+export function playerJoin(
+  game: GameStateWithPersisted<GameState, Persisted>,
+  playerId: PlayerId
+) {
+  const { gameId } = game.persisted[playerId]
+  if (gameId === game.id) {
+    game.playersJoined.push(playerId)
   }
 }
