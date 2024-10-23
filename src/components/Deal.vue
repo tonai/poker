@@ -10,7 +10,6 @@ import {
   playerCards,
   playerId,
   playerIds,
-  remainingPlayers,
   round,
   step,
   winnerCards,
@@ -59,6 +58,9 @@ onMounted(() => {
     if (dealIndex.value === deal.value.length) {
       clearInterval(interval)
       emit("ready")
+      if (round.value === 4) {
+        playerIds.value.forEach(reveal)
+      }
     } else {
       dealIndex.value++
       animateDeal()
@@ -143,7 +145,7 @@ watch(round, () => {
 })
 onMounted(() => {
   if (communityCards.value.length) {
-    setTimeout(animateCommunityCards, remainingPlayers.value.length * 1000)
+    setTimeout(animateCommunityCards, playerCards.value.length * 1000)
   }
 })
 
