@@ -6,6 +6,7 @@ import {
   playerChips,
   playerId,
   playerIds,
+  playerIn,
   playerOut,
   winners,
 } from "../store"
@@ -17,7 +18,9 @@ const isSpectator = computed(() => !playerIds.value.includes(playerId.value))
 const isWinner = computed(() => winners.value.includes(playerId.value))
 
 const label = computed(() => {
-  if (isSpectator.value) {
+  if (playerIn.value) {
+    return "Joining"
+  } else if (isSpectator.value) {
     return "Spectator"
   } else if (playerOut.value) {
     return "Out"

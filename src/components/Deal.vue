@@ -10,7 +10,6 @@ import {
   playerCards,
   playerId,
   playerIds,
-  remainingPlayers,
   round,
   step,
   winnerCards,
@@ -30,7 +29,7 @@ const animationDelay = 100
 
 // Deal cards
 const dealCardPositions = ref<CardPosition[]>(
-  createArray(remainingPlayers.value.length * 2, {
+  createArray(12, {
     ...props.playerPositions[dealerId.value],
   })
 )
@@ -45,6 +44,8 @@ function animateDeal() {
   setTimeout(() => {
     const cardPlayerId = deal.value[dealIndex.value - 1].id
     dealCardPositions.value[dealIndex.value - 1] = {
+      left: "var(--left)",
+      top: "var(--top2)",
       ...props.playerCardPositions[cardPlayerId],
       rotate: `${randomInt(360, -360)}deg`,
       scale: cardPlayerId === playerId.value ? 1 : 0.5,
@@ -160,37 +161,37 @@ watch(step, () => {
 })
 
 // Player join/left
-// watch(
-//   playerIds,
-//   () => {
-//     deal.value.forEach((card, index) => {
-//       if (
-//         playerIds.value.includes(card.id) &&
-//         !discardIds.value.includes(card.id)
-//       ) {
-//         // Update position
-//         dealCardPositions.value[index].left =
-//           props.playerCardPositions[card.id].left
-//         dealCardPositions.value[index].top =
-//           props.playerCardPositions[card.id].top
-//       } else {
-//         // Discard
-//         dealCardPositions.value[index].translate = "-50% 0"
-//         dealCardPositions.value[index].left = "var(--left)"
-//         dealCardPositions.value[index].top = "var(--top2)"
-//         dealCardPositions.value[index].scale = 0.5
-//       }
-//     })
-//     communityCardPositions.value.forEach((card) => {
-//       if (card.flipped && card.scale !== 0.5) {
-//         // Update start position
-//         card.left = props.playerPositions[dealerId.value].left
-//         card.top = props.playerPositions[dealerId.value].top
-//       }
-//     })
-//   },
-//   { flush: "post" }
-// )
+watch(
+  playerIds,
+  () => {
+    deal.value.forEach((card, index) => {
+      if (
+        playerIds.value.includes(card.id) &&
+        !discardIds.value.includes(card.id)
+      ) {
+        // Update position
+        dealCardPositions.value[index].left =
+          props.playerCardPositions[card.id].left
+        dealCardPositions.value[index].top =
+          props.playerCardPositions[card.id].top
+      } else {
+        // Discard
+        dealCardPositions.value[index].translate = "-50% 0"
+        dealCardPositions.value[index].left = "var(--left)"
+        dealCardPositions.value[index].top = "var(--top2)"
+        dealCardPositions.value[index].scale = 0.5
+      }
+    })
+    communityCardPositions.value.forEach((card) => {
+      if (card.flipped && card.scale !== 0.5) {
+        // Update start position
+        card.left = props.playerPositions[dealerId.value].left
+        card.top = props.playerPositions[dealerId.value].top
+      }
+    })
+  },
+  { flush: "post" }
+)
 </script>
 
 <template>

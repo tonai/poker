@@ -9,9 +9,11 @@ import {
   dealerIndex,
   gameRound,
   playerId,
+  persistedData,
   playerCards,
   playerChips,
   playerIds,
+  playersJoined,
   playersReady,
   remainingPlayers,
   round,
@@ -30,6 +32,9 @@ onMounted(() => {
     onChange: ({ game, yourPlayerId }) => {
       if (yourPlayerId && playerId.value !== yourPlayerId) {
         playerId.value = yourPlayerId
+        if (persistedData.value !== game.persisted[yourPlayerId]) {
+          persistedData.value = game.persisted[yourPlayerId]
+        }
       }
       if (bets.value !== game.bets) {
         bets.value = game.bets
@@ -54,6 +59,9 @@ onMounted(() => {
       }
       if (playerIds.value !== game.playerIds) {
         playerIds.value = game.playerIds
+      }
+      if (playersJoined.value !== game.playersJoined) {
+        playersJoined.value = game.playersJoined
       }
       if (playersReady.value !== game.playersReady) {
         playersReady.value = game.playersReady

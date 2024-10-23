@@ -2,6 +2,7 @@ import { computed, ref } from "vue"
 
 import { startBlind } from "../constants"
 import { getDealerId, getPlayerOrder, getRank } from "../helpers"
+import { Persisted } from "../logic"
 import { Bet, Cards, PlayerCards, Step, WinnerHand } from "../types"
 
 export const bets = ref<Bet[]>([])
@@ -9,10 +10,12 @@ export const blind = ref(startBlind)
 export const communityCards = ref<Cards>([])
 export const dealerIndex = ref(0)
 export const gameRound = ref(0)
+export const persistedData = ref<Persisted>({})
 export const playerId = ref("")
 export const playerCards = ref<PlayerCards[]>([])
 export const playerChips = ref<Record<string, number>>({})
 export const playerIds = ref<string[]>([])
+export const playersJoined = ref<string[]>([])
 export const playersReady = ref<string[]>([])
 export const remainingPlayers = ref<string[]>([])
 export const round = ref(0)
@@ -21,6 +24,9 @@ export const step = ref<Step>(Step.WAIT)
 export const turnIndex = ref(0)
 export const winnerHands = ref<WinnerHand[]>([])
 
+export const playerIn = computed(() =>
+  playersJoined.value.includes(playerId.value)
+)
 export const playerOut = computed(
   () => !remainingPlayers.value.includes(playerId.value)
 )
