@@ -35,7 +35,7 @@ function startBetAnimation(indexes: number[]) {
   startTotalAnimation(indexes)
 }
 onMounted(() => {
-  startBetAnimation([0, 1])
+  startBetAnimation(Object.keys(bets.value).map(Number))
 })
 watch(bets, () => {
   if (bets.value.length > betLength.value) {

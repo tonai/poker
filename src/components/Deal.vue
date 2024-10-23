@@ -10,6 +10,7 @@ import {
   playerCards,
   playerId,
   playerIds,
+  remainingPlayers,
   round,
   step,
   winnerCards,
@@ -116,7 +117,7 @@ const communityCardsIndex = ref(1)
 const animatedCommunityCards = computed(() =>
   communityCards.value.slice(0, communityCardsIndex.value)
 )
-function animateCommunityCards() {
+function animateCommunityCard() {
   setTimeout(() => {
     communityCardPositions.value[communityCardsIndex.value - 1] = {
       flipped: false,
@@ -125,17 +126,25 @@ function animateCommunityCards() {
     }
   }, animationDelay)
 }
-watch(round, () => {
-  animateCommunityCards()
+function animateCommunityCards() {
+  animateCommunityCard()
   const interval = setInterval(() => {
     if (communityCardsIndex.value === communityCards.value.length) {
       clearInterval(interval)
       emit("ready")
     } else {
       communityCardsIndex.value++
-      animateCommunityCards()
+      animateCommunityCard()
     }
   }, intervalDelay)
+}
+watch(round, () => {
+  animateCommunityCards()
+})
+onMounted(() => {
+  if (communityCards.value.length) {
+    setTimeout(animateCommunityCards, remainingPlayers.value.length * 1000)
+  }
 })
 
 // Showdown
