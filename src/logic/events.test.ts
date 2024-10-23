@@ -83,6 +83,43 @@ describe("Event logic", () => {
   })
 
   describe("playerLeft", () => {
+    it("should do nothing if player was a spectator", () => {
+      const state: GameStateWithPersisted<GameState, Persisted> = {
+        bets: [],
+        blind: 10,
+        communityCards: [],
+        dealerIndex: 0,
+        deck: [],
+        game: 0,
+        id: "42",
+        persisted: {},
+        playerCards: [],
+        playerChips: { a: 1000, b: 990, c: 980, d: 1000 },
+        playerIds: ["a", "b", "c", "d"],
+        playersJoined: [],
+        playersOrder: { a: 0, b: 1, c: 2, d: 3 },
+        playersReady: [],
+        remainingPlayers: ["a", "b", "c", "d"],
+        round: 0,
+        roundWinners: {},
+        step: Step.PLAY,
+        turnIndex: 1,
+        winnerHands: [],
+      }
+      // "e" left
+      playerLeft(state, "e")
+      expect(state.dealerIndex).toEqual(0)
+      expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 980, d: 1000 })
+      expect(state.playerIds).toEqual(["a", "b", "c", "d"])
+      expect(state.playersOrder).toEqual({ a: 0, b: 1, c: 2, d: 3 })
+      expect(state.remainingPlayers).toEqual(["a", "b", "c", "d"])
+      expect(state.round).toEqual(0)
+      expect(state.step).toEqual(Step.PLAY)
+      expect(state.turnIndex).toEqual(1)
+      expect(state.persisted).toEqual({})
+      expect(nextRound).not.toHaveBeenCalled()
+    })
+
     it("should remove the player if he was already out", () => {
       const state: GameStateWithPersisted<GameState, Persisted> = {
         bets: [],

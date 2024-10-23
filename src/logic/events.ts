@@ -10,8 +10,13 @@ export function playerLeft(
   game: GameStateWithPersisted<GameState, Persisted>,
   playerId: PlayerId
 ) {
+  if (game.playerIds.indexOf(playerId) === -1) {
+    // Spectator leaving
+    return
+  }
   game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
   if (!game.remainingPlayers.includes(playerId)) {
+    // Out player leaving
     delete game.playerChips[playerId]
     delete game.playersOrder[playerId]
     return
