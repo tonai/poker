@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue"
 
 import {
   allInPlayers,
+  persistedData,
   playerChips,
   playerId,
   playerIds,
@@ -36,7 +37,9 @@ const resultClasses = computed(() => ({
 }))
 
 // Amount sync with bet transitions
-const amount = ref(playerChips.value[playerId.value])
+const amount = ref(
+  playerChips.value[playerId.value] ?? persistedData.value.chips
+)
 watch(playerChips, () => {
   if (amount.value > playerChips.value[playerId.value]) {
     amount.value = playerChips.value[playerId.value]

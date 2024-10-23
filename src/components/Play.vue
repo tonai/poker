@@ -84,6 +84,11 @@ watch(step, () => {
     setTimeout(() => Rune.actions.nextRound(), time)
   }
 })
+
+const initialized = ref(false)
+onMounted(() => {
+  initialized.value = true
+})
 </script>
 
 <template>
@@ -96,7 +101,7 @@ watch(step, () => {
       :player-card-positions="playerCardPositions"
       @ready="canPlay = true"
     />
-    <Pot :player-positions="playerChipsPositions" />
+    <Pot v-if="initialized" :player-positions="playerChipsPositions" />
     <div class="players">
       <Player v-for="id of otherPlayers" :id="id" :key="id" ref="playerRefs" />
     </div>

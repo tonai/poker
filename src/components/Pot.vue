@@ -73,7 +73,7 @@ watch(roundWinners, () => {
     :key="index"
     :amount="bet.amount"
     class="pile"
-    :style="betPositions[index] ?? playerPositions[bet.id]"
+    :style="betPositions[index] ?? playerPositions[bet.id] ?? position"
   />
   <template v-if="!animationEnd">
     <ChipPile
