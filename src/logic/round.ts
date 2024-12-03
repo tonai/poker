@@ -20,9 +20,6 @@ export function startGame(game: GameState) {
   game.playerChips = Object.fromEntries(
     game.playerIds.map((id) => [id, startPlayerAmount])
   )
-  // game.playerChips = Object.fromEntries(
-  //   game.playerIds.map((id, i) => [id, Math.floor(startPlayerAmount / (i + 1))])
-  // )
   game.remainingPlayers = game.playerIds
   game.playersOrder = Object.fromEntries(game.playerIds.map((id, i) => [id, i]))
 }

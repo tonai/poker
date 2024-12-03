@@ -98,21 +98,20 @@ Rune.initLogic({
       }
       nextGame(game)
     },
-    ready(_, { game }) {
+    ready(_, { game, playerId }) {
       if (game.step !== Step.WAIT) {
         return Rune.invalidAction()
       }
-      startGame(game)
-      nextGame(game)
-      /*const index = game.playersReady.indexOf(playerId)
+      const index = game.playersReady.indexOf(playerId)
       if (index !== -1) {
         game.playersReady.splice(index, 1)
       } else {
         game.playersReady.push(playerId)
         if (game.playersReady.length === game.playerIds.length) {
-          startRound(game)
+          startGame(game)
+          nextGame(game)
         }
-      }*/
+      }
     },
   },
   events: {
@@ -124,6 +123,10 @@ Rune.initLogic({
       }
     },
     playerLeft(playerId, { game }) {
+      const index = game.playersReady.indexOf(playerId)
+      if (index !== -1) {
+        game.playersReady.splice(index, 1)
+      }
       if (game.step === Step.WAIT) {
         game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
       } else {

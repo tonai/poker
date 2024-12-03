@@ -113,7 +113,6 @@ onMounted(() => {
 
 <style scoped>
 .play {
-  background: #5db779;
   width: 100%;
   height: 100vh;
   display: flex;

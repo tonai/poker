@@ -19,6 +19,10 @@ const color = computed(() =>
 )
 const rankId = computed(() => `#card-${props.rank}`)
 const suitId = computed(() => `#${props.suit}`)
+const isFigure = computed(() => ["J", "Q", "K"].includes(String(props.rank)))
+const isLetter = computed(() =>
+  ["P", "O", "E", "R"].includes(String(props.rank))
+)
 </script>
 
 <template>
@@ -26,9 +30,10 @@ const suitId = computed(() => `#${props.suit}`)
   <use
     :xlink:href="rankId"
     :stroke="color"
+    :fill="color"
     height="32"
     width="32"
-    x="-114.4"
+    :x="isLetter ? -108.5 : -114.4"
     y="-156"
   ></use>
   <use
@@ -44,9 +49,10 @@ const suitId = computed(() => `#${props.suit}`)
     <use
       :xlink:href="rankId"
       :stroke="color"
+      :fill="color"
       height="32"
       width="32"
-      x="-114.4"
+      :x="isLetter ? -108.5 : -114.4"
       y="-156"
     ></use>
     <use
@@ -61,11 +67,13 @@ const suitId = computed(() => `#${props.suit}`)
   <!-- Pips -->
   <Pips :color="color" :rank="rank" :suit-id="suitId" />
   <!-- Figures -->
-  <template v-for="n in 6" :key="n">
-    <Figure :n="n" :rank="rank" :suit="suit" />
-    <g transform="rotate(180)">
+  <template v-if="isFigure">
+    <template v-for="n in 6" :key="n">
       <Figure :n="n" :rank="rank" :suit="suit" />
-    </g>
+      <g transform="rotate(180)">
+        <Figure :n="n" :rank="rank" :suit="suit" />
+      </g>
+    </template>
   </template>
   <!-- Jack -->
   <template v-if="rank === 'J'">
@@ -88,6 +96,17 @@ const suitId = computed(() => `#${props.suit}`)
       <King :color="color" :suit="suit" :suit-id="suitId" />
     </g>
   </template>
+  <!-- Letters -->
+  <use
+    v-if="isLetter"
+    :xlink:href="rankId"
+    :stroke="color"
+    :fill="color"
+    height="160"
+    width="160"
+    x="-49.5"
+    y="-82.5"
+  ></use>
   <!-- Rect -->
   <rect
     v-if="typeof rank === 'string'"
