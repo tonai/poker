@@ -14,6 +14,7 @@ import {
 
 import Amount from "./Amount.vue"
 import Chip from "./Chip.vue"
+import { playSound } from "@tonai/game-utils"
 
 type GroupedActionType = "allIn" | "check" | "fold" | "raise"
 
@@ -28,6 +29,7 @@ const action = ref<GroupedActionType>()
 const raiseValue = ref(minRaise.value)
 
 function select(type: GroupedActionType) {
+  playSound("select")
   if (action.value === type) {
     action.value = undefined
   } else {
@@ -37,6 +39,7 @@ function select(type: GroupedActionType) {
 
 function confirm() {
   if (action.value) {
+    playSound("confirm")
     Rune.actions.action(
       getAction(
         checkOrCallBet.value,

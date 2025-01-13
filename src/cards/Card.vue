@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { watch } from "vue"
+import { playSound } from "@tonai/game-utils"
+
 import { Rank, Suit } from "../types"
 
 import CardBack from "./CardBack.vue"
 import CardFront from "./CardFront.vue"
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     flipped?: boolean
     opacity?: boolean
@@ -14,6 +17,11 @@ withDefaults(
   {
     flipped: false,
   }
+)
+
+watch(
+  () => props.flipped,
+  () => playSound("cardSingleFlip")
 )
 </script>
 
@@ -30,7 +38,7 @@ withDefaults(
   display: grid;
   transform-style: preserve-3d;
   perspective: 1000px;
-  transition: transform 200ms ease;
+  transition: transform 200ms 100ms ease;
 }
 .flipped {
   transform: rotateY(180deg);

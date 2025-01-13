@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
-import { randomInt } from "@tonai/game-utils"
+import { playSound, randomInt } from "@tonai/game-utils"
 
 import { otherPlayers, playerId, playerTurn, round, step } from "../store"
 import { Position, Step } from "../types"
@@ -88,6 +88,10 @@ watch(step, () => {
 const initialized = ref(false)
 onMounted(() => {
   initialized.value = true
+})
+
+onMounted(() => {
+  setTimeout(() => playSound("shuffle"), 400)
 })
 </script>
 

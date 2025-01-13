@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { playSound } from "@tonai/game-utils"
 
 import { playerId, playerOut, playersReady, winnerHands } from "../store"
 import { HandCategory } from "../types"
@@ -31,8 +32,14 @@ const winningHand = computed(() => {
   }
   return ""
 })
+const selected = computed(() => playersReady.value.includes(playerId.value))
 
 function endRound() {
+  if (selected.value) {
+    playSound("cancel")
+  } else {
+    playSound("select")
+  }
   Rune.actions.endRound()
 }
 </script>
@@ -43,7 +50,7 @@ function endRound() {
       <button
         type="button"
         class="button endRound"
-        :class="{ selected: playersReady.includes(playerId) }"
+        :class="{ selected }"
         @click="endRound"
       >
         Next round

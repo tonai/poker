@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted } from "vue"
+import { onMounted, onUnmounted, ref } from "vue"
+import { initSounds, playMusic } from "@tonai/game-utils"
 
 import { Defs } from "../cards"
 import {
@@ -87,6 +88,39 @@ onMounted(() => {
     },
   })
 })
+
+const music = ref<HTMLAudioElement>()
+onMounted(() => {
+  initSounds({
+    cancel: ["sounds/cancel.mp3"],
+    cardSingleFlip: [
+      "sounds/card_single_flip_01.mp3",
+      "sounds/card_single_flip_02.mp3",
+      "sounds/card_single_flip_03.mp3",
+      "sounds/card_single_flip_04.mp3",
+    ],
+    chips: [
+      "sounds/Coin_Falling_On_Surface_01.mp3",
+      "sounds/Coin_Falling_On_Surface_02.mp3",
+      "sounds/Coin_Falling_On_Surface_03.mp3",
+      "sounds/Coin_Falling_On_Surface_04.mp3",
+    ],
+    confirm: ["sounds/confirm.mp3"],
+    music: ["sounds/music.mp3"],
+    select: ["sounds/select.mp3"],
+    shuffle: [
+      "sounds/cards_shuffle_01.mp3",
+      "sounds/cards_shuffle_02.mp3",
+      "sounds/cards_shuffle_03.mp3",
+    ],
+    won: "sounds/Game_Coin_Win_01.mp3",
+    // all-in
+    // fold
+    // card deal
+  })
+  playMusic("music", 0.2)
+})
+onUnmounted(() => music.value?.pause())
 </script>
 
 <template>

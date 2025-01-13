@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue"
 
-import { bets, blind, roundWinners } from "../store"
+import { bets, blind, playerId, roundWinners } from "../store"
 import { PilePosition, Position } from "../types"
 
 import Amount from "./Amount.vue"
 import ChipPile from "./ChipPile.vue"
+import { playSound } from "@tonai/game-utils"
 
 const props = defineProps<{
   playerPositions: Record<string, Position>
@@ -28,10 +29,13 @@ function startTotalAnimation(indexes: number[]) {
   }, 1000)
 }
 function startBetAnimation(indexes: number[]) {
-  setTimeout(
-    () => indexes.forEach((i) => (betPositions.value[i] = { ...position })),
-    100
-  )
+  setTimeout(() => {
+    indexes.forEach((i) => (betPositions.value[i] = { ...position }))
+    const total = indexes.reduce((acc, i) => acc + bets.value[i].amount, 0)
+    if (total > 0) {
+      playSound("chips")
+    }
+  }, 100)
   startTotalAnimation(indexes)
 }
 onMounted(() => {
@@ -55,6 +59,11 @@ watch(roundWinners, () => {
         winners.map((id) => [id, props.playerPositions[id]])
       )
       total.value = 0
+      if (winners.includes(playerId.value)) {
+        playSound("won")
+      } else {
+        playSound("lost")
+      }
     }, 1200)
     setTimeout(() => {
       animationEnd.value = true

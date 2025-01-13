@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { randomInt } from "@tonai/game-utils"
-import { ref } from "vue"
+import { playSound, randomInt } from "@tonai/game-utils"
+import { computed, ref } from "vue"
 
 import { Card } from "../cards"
 import { playerId, playerIds, playersReady } from "../store"
@@ -24,11 +24,11 @@ const combinations: { rank: Rank; suit: Suit }[][] = [
     { rank: "R", suit: "♥" },
   ],
   [
-    { rank: 1, suit: "♣" },
-    { rank: "K", suit: "♣" },
-    { rank: "Q", suit: "♣" },
-    { rank: "J", suit: "♣" },
-    { rank: 10, suit: "♣" },
+    { rank: 1, suit: "♠" },
+    { rank: "K", suit: "♠" },
+    { rank: "Q", suit: "♠" },
+    { rank: "J", suit: "♠" },
+    { rank: 10, suit: "♠" },
   ],
   [
     { rank: 1, suit: "♣" },
@@ -42,6 +42,7 @@ const combinations: { rank: Rank; suit: Suit }[][] = [
 const disabled = ref(false)
 const combination = ref(0)
 const flipped = ref([false, false, false, false, false])
+const selected = computed(() => playersReady.value.includes(playerId.value))
 
 function toggleCards() {
   if (disabled.value) {
@@ -64,93 +65,95 @@ function toggleCards() {
 }
 
 function ready() {
+  if (selected.value) {
+    playSound("cancel")
+  } else {
+    playSound("select")
+  }
   Rune.actions.ready()
 }
 </script>
 
 <template>
   <div class="startScreen">
-    <button class="cards" :disabled="disabled" type="button">
-      <div
-        v-for="(card, index) of combinations[combination]"
-        :key="index"
-        class="cardContainer"
-        @click="toggleCards"
-      >
-        <Card
-          class="card"
-          :rank="card.rank"
-          :suit="card.suit"
-          :flipped="flipped[index]"
+    <div class="content">
+      <button class="cards" :disabled="disabled" type="button">
+        <div
+          v-for="(card, index) of combinations[combination]"
+          :key="index"
+          class="cardContainer"
+          @click="toggleCards"
+        >
+          <Card
+            class="card"
+            :rank="card.rank"
+            :suit="card.suit"
+            :flipped="flipped[index]"
+          />
+        </div>
+      </button>
+      <div class="players">
+        <Avatar v-for="id of playerIds" :id="id" :key="id" name />
+      </div>
+      <button class="button" :class="{ selected }" type="button" @click="ready">
+        Ready
+        <Avatar
+          v-for="id of playersReady"
+          :id="id"
+          :key="id"
+          class="playerAvatar"
+        />
+      </button>
+      <div class="piles">
+        <ChipPile
+          :style="{
+            bottom: 'calc(var(--size) * -10)',
+            left: 'calc(var(--size) * 50)',
+            translate: '0 0',
+          }"
+          :amount="8888"
+        />
+        <ChipPile
+          :style="{
+            bottom: 'calc(var(--size) * -10)',
+            left: 'calc(var(--size) * 35)',
+            translate: '0 0',
+          }"
+          :amount="6880"
+        />
+        <ChipPile
+          :style="{
+            bottom: 'calc(var(--size) * -10)',
+            left: 'calc(var(--size) * 22)',
+            translate: '0 0',
+          }"
+          :amount="4001"
+        />
+        <ChipPile
+          :style="{
+            bottom: 'calc(var(--size) * -10)',
+            left: 'calc(var(--size) * 68)',
+            translate: '0 0',
+          }"
+          :amount="2862"
+        />
+        <ChipPile
+          :style="{
+            bottom: 'calc(var(--size) * -10)',
+            left: 'calc(var(--size) * 52)',
+            translate: '0 0',
+          }"
+          :amount="3808"
+        />
+        <ChipPile
+          :style="{
+            bottom: 'calc(var(--size) * -10)',
+            left: 'calc(var(--size) * 38)',
+            translate: '0 0',
+          }"
+          :amount="47"
         />
       </div>
-    </button>
-    <div class="players">
-      <Avatar v-for="id of playerIds" :id="id" :key="id" name />
-    </div>
-    <button
-      class="button"
-      :class="{ selected: playersReady.includes(playerId) }"
-      type="button"
-      @click="ready"
-    >
-      Ready
-      <Avatar
-        v-for="id of playersReady"
-        :id="id"
-        :key="id"
-        class="playerAvatar"
-      />
-    </button>
-    <div class="piles">
-      <ChipPile
-        :style="{
-          bottom: 'calc(var(--size) * -10)',
-          left: 'calc(var(--size) * 50)',
-          translate: '0 0',
-        }"
-        :amount="8888"
-      />
-      <ChipPile
-        :style="{
-          bottom: 'calc(var(--size) * -10)',
-          left: 'calc(var(--size) * 35)',
-          translate: '0 0',
-        }"
-        :amount="6880"
-      />
-      <ChipPile
-        :style="{
-          bottom: 'calc(var(--size) * -10)',
-          left: 'calc(var(--size) * 22)',
-          translate: '0 0',
-        }"
-        :amount="4001"
-      />
-      <ChipPile
-        :style="{
-          bottom: 'calc(var(--size) * -10)',
-          left: 'calc(var(--size) * 68)',
-          translate: '0 0',
-        }"
-        :amount="2862"
-      />
-      <ChipPile
-        :style="{
-          bottom: 'calc(var(--size) * -10)',
-          left: 'calc(var(--size) * 52)',
-          translate: '0 0',
-        }"
-        :amount="3808"
-      />
-      <ChipPile
-        :style="{
-          bottom: 'calc(var(--size) * -10)',
-          left: 'calc(var(--size) * 38)',
-          translate: '0 0',
-        }"
-        :amount="47"
-      />
     </div>
   </div>
 </template>
@@ -159,8 +162,26 @@ function ready() {
 .startScreen {
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
   flex: 1;
+  width: 100%;
+  align-items: center;
+}
+
+.startScreen:before {
+  content: "";
+  position: absolute;
+  inset: 3vw;
+  border: 1px solid white;
+  border-radius: 3vw;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: stretch;
+  flex: 1;
+  width: calc(var(--size) * 98);
 }
 
 .cards {
@@ -169,6 +190,7 @@ function ready() {
   padding: 2vh 0;
   background: none;
   border: 0;
+  margin: 0 auto;
 }
 
 .cardContainer:nth-child(1) {
