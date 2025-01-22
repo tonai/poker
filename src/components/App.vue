@@ -93,6 +93,12 @@ const music = ref<HTMLAudioElement>()
 onMounted(() => {
   initSounds({
     cancel: ["sounds/cancel.mp3"],
+    cardDeal: [
+      "sounds/card-flick-01.mp3",
+      "sounds/card-flick-02.mp3",
+      "sounds/card-flick-03.mp3",
+      "sounds/card-flick-04.mp3",
+    ],
     cardSingleFlip: [
       "sounds/card_single_flip_01.mp3",
       "sounds/card_single_flip_02.mp3",
@@ -116,7 +122,6 @@ onMounted(() => {
     won: "sounds/Game_Coin_Win_01.mp3",
     // all-in
     // fold
-    // card deal
   })
   playMusic("music", 0.2)
 })

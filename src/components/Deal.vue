@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
-import { createArray, randomInt } from "@tonai/game-utils"
+import { createArray, playSound, randomInt } from "@tonai/game-utils"
 
 import { Card } from "../cards"
 import {
@@ -50,6 +50,7 @@ function animateDeal() {
       rotate: `${randomInt(360, -360)}deg`,
       scale: cardPlayerId === playerId.value ? 1 : 0.5,
     }
+    playSound("cardDeal")
   }, animationDelay)
 }
 onMounted(() => {
