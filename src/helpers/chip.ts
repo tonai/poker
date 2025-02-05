@@ -1,4 +1,4 @@
-import { createArray } from "@tonai/game-utils"
+import { createArray } from "@tonai/game-utils/server"
 
 import { Bet } from "../types"
 
