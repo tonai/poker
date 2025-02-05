@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue"
-import { initSounds, playMusic } from "@tonai/game-utils"
+import { initSounds, playMusic, playSound } from "@tonai/game-utils"
 
 import { Defs } from "../cards"
 import {
@@ -30,7 +30,15 @@ import StartScreen from "./StartScreen.vue"
 
 onMounted(() => {
   Rune.initClient({
-    onChange: ({ game, yourPlayerId }) => {
+    onChange: ({ game, yourPlayerId, action }) => {
+      if (action && action.name === "action") {
+        const { params } = action
+        if (params.type === "allIn") {
+          playSound("allIn")
+        } else if (params.type === "fold") {
+          playSound("fold")
+        }
+      }
       if (yourPlayerId && playerId.value !== yourPlayerId) {
         playerId.value = yourPlayerId
         if (persistedData.value !== game.persisted[yourPlayerId]) {
@@ -120,8 +128,9 @@ onMounted(() => {
       "sounds/cards_shuffle_03.mp3",
     ],
     won: "sounds/Game_Coin_Win_01.mp3",
-    // all-in
-    // fold
+    lost: "sounds/lost.mp3",
+    allIn: "sounds/all-in.mp3",
+    fold: "sounds/fold.mp3",
   })
   playMusic("music", 0.2)
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue"
 
-import { bets, blind, playerId, roundWinners } from "../store"
+import { bets, blind, playerId, playersReady, roundWinners } from "../store"
 import { PilePosition, Position } from "../types"
 
 import Amount from "./Amount.vue"
@@ -53,7 +53,7 @@ const totalPosition = ref<Record<string, Position>>({})
 const animationEnd = ref(false)
 watch(roundWinners, () => {
   const winners = Object.keys(roundWinners.value)
-  if (winners.length > 0) {
+  if (winners.length > 0 && playersReady.value.length === 0) {
     setTimeout(() => {
       totalPosition.value = Object.fromEntries(
         winners.map((id) => [id, props.playerPositions[id]])

@@ -83,7 +83,7 @@ function endRound() {
 }
 @keyframes slide-right {
   0% {
-    translate: -200% 0;
+    translate: -250% 0;
   }
   100% {
     translate: 0 0;
