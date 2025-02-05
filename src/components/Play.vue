@@ -12,6 +12,7 @@ import MainPlayer from "./MainPlayer.vue"
 import NextRound from "./NextRound.vue"
 import Player from "./Player.vue"
 import Pot from "./Pot.vue"
+import Help from "./Help.vue"
 
 // Positions
 const playerRefs = ref<InstanceType<typeof Player>[]>([])
@@ -112,6 +113,7 @@ onMounted(() => {
     <MainPlayer />
     <Dealer :player-positions="playerDealerPositions" />
     <Actions v-if="canPlay && playerTurn === playerId" />
+    <Help />
   </div>
 </template>
 
