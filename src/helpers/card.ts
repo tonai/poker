@@ -36,6 +36,7 @@ export function getRank(rank: SortedRank): Rank {
 
 export function getSortedRank(rank: Rank): SortedRank {
   switch (rank) {
+    // Figures
     case "J":
       return 11
     case "Q":
@@ -44,6 +45,14 @@ export function getSortedRank(rank: Rank): SortedRank {
       return 13
     case 1:
       return 14
+    // Special cards (this should not happen)
+    case "E":
+    case "O":
+    case "P":
+    case "R":
+      console.error("Invalid rank:", rank)
+      return 2
+    // Numbers
     default:
       return rank
   }

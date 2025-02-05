@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CSSProperties } from "vue"
+
 import { dealerId } from "../store"
 import { Position } from "../types"
 
@@ -8,7 +10,9 @@ defineProps<{
 </script>
 
 <template>
-  <div class="dealer" :style="playerPositions[dealerId]">D</div>
+  <div class="dealer" :style="playerPositions[dealerId] as CSSProperties">
+    D
+  </div>
 </template>
 
 <style scoped>
