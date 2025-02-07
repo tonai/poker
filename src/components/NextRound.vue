@@ -2,7 +2,13 @@
 import { computed } from "vue"
 import { playSound } from "@tonai/game-utils"
 
-import { playerId, playerOut, playersReady, winnerHands } from "../store"
+import {
+  playerId,
+  playerOut,
+  playersReady,
+  roundWinners,
+  winnerHands,
+} from "../store"
 import { HandCategory } from "../types"
 
 import Avatar from "./Avatar.vue"
@@ -33,6 +39,13 @@ const winningHand = computed(() => {
   return ""
 })
 const selected = computed(() => playersReady.value.includes(playerId.value))
+const winners = computed(() =>
+  Object.keys(roundWinners.value)
+    .map((id) =>
+      id === playerId.value ? "You" : Rune.getPlayerInfo(id).displayName
+    )
+    .join(" and ")
+)
 
 function endRound() {
   if (selected.value) {
@@ -64,7 +77,10 @@ function endRound() {
         />
       </div>
     </template>
-    <div class="hand">{{ winningHand }}</div>
+    <div class="hand">
+      {{ winners }} winning hand<br />
+      with {{ winningHand }}
+    </div>
   </div>
 </template>
 
@@ -112,10 +128,14 @@ function endRound() {
   }
 }
 .hand {
-  margin-top: calc(var(--size) * 10);
-  font-size: calc(var(--size) * 10);
+  height: calc(var(--size) * 26);
+  font-size: calc(var(--size) * 6);
   font-weight: bold;
   animation: 1s ease-in both slide-up;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 @keyframes slide-up {
   0% {
