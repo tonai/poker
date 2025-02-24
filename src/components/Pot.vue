@@ -31,7 +31,10 @@ function startTotalAnimation(indexes: number[]) {
 function startBetAnimation(indexes: number[]) {
   setTimeout(() => {
     indexes.forEach((i) => (betPositions.value[i] = { ...position }))
-    const total = indexes.reduce((acc, i) => acc + bets.value[i].amount, 0)
+    const total = indexes.reduce(
+      (acc, i) => acc + (bets.value[i]?.amount ?? 0),
+      0
+    )
     if (total > 0) {
       playSound("chips")
     }
