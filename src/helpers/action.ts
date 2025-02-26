@@ -6,6 +6,9 @@ export function getAction(
   playerChips: number,
   type?: FullActionType
 ): Action {
+  if (type === "fold") {
+    return { type, amount: 0, raise: 0 }
+  }
   const amount = Math.min(raiseAmount + checkAmount, playerChips)
   if (amount === playerChips) {
     type = "allIn"
