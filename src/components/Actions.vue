@@ -81,7 +81,6 @@ function confirm() {
       <button
         type="button"
         class="button"
-        :disabled="disableRaise"
         :class="{ selected: action === 'allIn' }"
         @click="select('allIn')"
       >
