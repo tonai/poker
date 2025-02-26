@@ -3,6 +3,7 @@ import {
   Combination,
   Hand,
   HandCategory,
+  PlayerCards,
   Rank,
   SortedCard,
   SortedCards,
@@ -312,4 +313,20 @@ export function getHand(cards: SortedCards): Hand {
     ...(getHighRankValues(sortedCards) as Combination),
     category: HandCategory.HighCard,
   }
+}
+
+export function getWinningHands(
+  playerCards: PlayerCards[],
+  communityCards: Cards
+) {
+  const hands = playerCards
+    .map(({ cards, id }) => ({
+      hand: getHand(getSortedCards(cards.concat(communityCards))),
+      id,
+    }))
+    .sort(({ hand: handA }, { hand: handB }) => compareHands(handA, handB))
+  const [first, ...otherHands] = hands
+  return [first].concat(
+    otherHands.filter(({ hand }) => compareHands(first.hand, hand) === 0)
+  )
 }

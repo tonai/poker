@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { HandCategory } from "../types"
+import { Cards, HandCategory } from "../types"
 
 import {
   compareHands,
@@ -9,6 +9,7 @@ import {
   getRank,
   getSortedCards,
   getSortedRank,
+  getWinningHands,
 } from "./card"
 
 describe("Card helper", () => {
@@ -1565,5 +1566,81 @@ describe("Card helper", () => {
         )
       ).toEqual(0)
     })
+  })
+
+  describe("getWinningHands", () => {
+    it("should returns the winner", () => {
+      const communityCards: Cards = [
+        { rank: 2, suit: "♥" },
+        { rank: 3, suit: "♥" },
+        { rank: 1, suit: "♣" },
+        { rank: 10, suit: "♥" },
+        { rank: 7, suit: "♣" },
+      ]
+      const player1Hand: Cards = [
+        { rank: "Q", suit: "♥" },
+        { rank: 6, suit: "♠" },
+      ]
+      const player2Hand: Cards = [
+        { rank: 4, suit: "♦" },
+        { rank: 10, suit: "♠" },
+      ]
+      const playerCards = [
+        { id: "player1", cards: player1Hand },
+        { id: "player2", cards: player2Hand },
+      ]
+      const winnerHands = getWinningHands(playerCards, communityCards)
+      expect(winnerHands.length).toEqual(1)
+      expect(winnerHands[0].id).toEqual("player2")
+    })
+  })
+
+  it("should returns the winner (same category)", () => {
+    const communityCards: Cards = [
+      { rank: 2, suit: "♥" },
+      { rank: 3, suit: "♥" },
+      { rank: 1, suit: "♣" },
+      { rank: 10, suit: "♥" },
+      { rank: 7, suit: "♣" },
+    ]
+    const player1Hand: Cards = [
+      { rank: "Q", suit: "♥" },
+      { rank: 10, suit: "♦" },
+    ]
+    const player2Hand: Cards = [
+      { rank: 4, suit: "♦" },
+      { rank: 10, suit: "♠" },
+    ]
+    const playerCards = [
+      { id: "player1", cards: player1Hand },
+      { id: "player2", cards: player2Hand },
+    ]
+    const winnerHands = getWinningHands(playerCards, communityCards)
+    expect(winnerHands.length).toEqual(1)
+    expect(winnerHands[0].id).toEqual("player1")
+  })
+
+  it("should returns both winners", () => {
+    const communityCards: Cards = [
+      { rank: 2, suit: "♥" },
+      { rank: 3, suit: "♥" },
+      { rank: 1, suit: "♣" },
+      { rank: 10, suit: "♥" },
+      { rank: 7, suit: "♣" },
+    ]
+    const player1Hand: Cards = [
+      { rank: "Q", suit: "♥" },
+      { rank: 10, suit: "♦" },
+    ]
+    const player2Hand: Cards = [
+      { rank: "Q", suit: "♦" },
+      { rank: 10, suit: "♠" },
+    ]
+    const playerCards = [
+      { id: "player1", cards: player1Hand },
+      { id: "player2", cards: player2Hand },
+    ]
+    const winnerHands = getWinningHands(playerCards, communityCards)
+    expect(winnerHands.length).toEqual(2)
   })
 })

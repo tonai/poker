@@ -3,12 +3,10 @@ import { modulo, shuffleArray } from "@tonai/game-utils/server"
 
 import { initialDeck, startPlayerAmount } from "../constants"
 import {
-  compareHands,
   getAction,
   getBetsByPlayers,
-  getHand,
   getShares,
-  getSortedCards,
+  getWinningHands,
 } from "../helpers"
 import { GameState, Persisted } from "../logic"
 import { Action, Step } from "../types"
@@ -176,17 +174,10 @@ export function nextRound(
     game.turnIndex = -1
 
     // Calculate best hands
-    const hands = game.playerCards
-      .filter(({ id }) => !foldPlayers.includes(id))
-      .map(({ cards, id }) => ({
-        hand: getHand(getSortedCards(cards.concat(game.communityCards))),
-        id,
-      }))
-      .sort(({ hand: handA }, { hand: handB }) => compareHands(handA, handB))
-    const [first, ...otherHands] = hands
-    const winnerHands = [first].concat(
-      otherHands.filter(({ hand }) => compareHands(first.hand, hand) === 0)
+    const playerCards = game.playerCards.filter(
+      ({ id }) => !foldPlayers.includes(id)
     )
+    const winnerHands = getWinningHands(playerCards, game.communityCards)
     game.winnerHands = winnerHands
     const winners = winnerHands.map(({ id }) => id)
     const playerBets = getBetsByPlayers(game.bets)
