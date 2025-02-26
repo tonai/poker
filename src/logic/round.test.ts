@@ -54,7 +54,12 @@ describe("Round logic", () => {
         winnerHands: [],
       }
       // "a" call
-      addAction(state, "a", { amount: 20, raise: 0, type: "call" })
+      addAction(
+        state,
+        "a",
+        { amount: 20, raise: 0, type: "call" },
+        state.playerIds
+      )
       expect(state.bets).toEqual([
         { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
         { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -84,7 +89,12 @@ describe("Round logic", () => {
       ).toEqual("b")
       expect(state.winnerHands).toEqual([])
       // "b" call
-      addAction(state, "b", { amount: 10, raise: 0, type: "call" })
+      addAction(
+        state,
+        "b",
+        { amount: 10, raise: 0, type: "call" },
+        state.playerIds
+      )
       expect(state.bets).toEqual([
         { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
         { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -115,7 +125,12 @@ describe("Round logic", () => {
       ).toEqual("c")
       expect(state.winnerHands).toEqual([])
       // "c" check -> start next round
-      addAction(state, "c", { amount: 0, raise: 0, type: "check" })
+      addAction(
+        state,
+        "c",
+        { amount: 0, raise: 0, type: "check" },
+        state.playerIds
+      )
       expect(state.bets).toEqual([
         { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
         { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -181,7 +196,12 @@ describe("Round logic", () => {
         winnerHands: [],
       }
       // "a" fold
-      addAction(state, "a", { amount: 0, raise: 0, type: "fold" })
+      addAction(
+        state,
+        "a",
+        { amount: 0, raise: 0, type: "fold" },
+        state.playerIds
+      )
       expect(state.bets).toEqual([
         { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
         { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -211,7 +231,12 @@ describe("Round logic", () => {
       ).toEqual("b")
       expect(state.winnerHands).toEqual([])
       // "b" fold -> end current game
-      addAction(state, "b", { amount: 0, raise: 0, type: "fold" })
+      addAction(
+        state,
+        "b",
+        { amount: 0, raise: 0, type: "fold" },
+        state.playerIds
+      )
       expect(state.bets).toEqual([
         { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
         { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -271,7 +296,12 @@ describe("Round logic", () => {
         winnerHands: [],
       }
       // "a" fold
-      addAction(state, "a", { amount: 0, raise: 0, type: "fold" })
+      addAction(
+        state,
+        "a",
+        { amount: 0, raise: 0, type: "fold" },
+        state.playerIds
+      )
       expect(state.bets).toEqual([
         { amount: 10, id: "b", raise: 0, round: 0, type: "smallBlind" },
         { amount: 20, id: "c", raise: 0, round: 0, type: "bigBlind" },
@@ -547,7 +577,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      nextRound(state, [])
+      nextRound(state, [], state.playerIds)
       expect(state.communityCards.length).toEqual(3)
       expect(state.dealerIndex).toEqual(0)
       expect(state.deck.length).toEqual(52 - 2 - 2 - 2 - 1 - 3)
@@ -612,7 +642,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      nextRound(state, [])
+      nextRound(state, [], state.playerIds)
       expect(state.communityCards.length).toEqual(4)
       expect(state.dealerIndex).toEqual(0)
       expect(state.deck.length).toEqual(52 - 2 - 2 - 2 - 1 - 3 - 1 - 1)
@@ -682,7 +712,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      nextRound(state, [])
+      nextRound(state, [], state.playerIds)
       expect(state.communityCards.length).toEqual(5)
       expect(state.dealerIndex).toEqual(0)
       expect(state.deck.length).toEqual(52 - 2 - 2 - 2 - 1 - 3 - 1 - 1 - 1 - 1)
@@ -757,7 +787,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      nextRound(state, [])
+      nextRound(state, [], state.playerIds)
       expect(state.communityCards.length).toEqual(5)
       expect(state.dealerIndex).toEqual(0)
       expect(state.deck.length).toEqual(52 - 2 - 2 - 2 - 1 - 3 - 1 - 1 - 1 - 1)
@@ -812,7 +842,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      nextRound(state, [])
+      nextRound(state, [], state.playerIds)
       expect(state.communityCards.length).toEqual(5)
       expect(state.dealerIndex).toEqual(0)
       expect(state.deck.length).toEqual(52 - 2 - 2 - 2 - 1 - 3 - 1 - 1 - 1 - 1)
@@ -909,7 +939,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      winRound(state, { c: 30 })
+      winRound(state, { c: 30 }, state.playerIds)
       expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 1010 })
       expect(state.remainingPlayers).toEqual(["a", "b", "c"])
       expect(state.roundWinners).toEqual({ c: 30 })
@@ -954,7 +984,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      winRound(state, { c: 30 })
+      winRound(state, { c: 30 }, state.playerIds)
       expect(state.playerChips).toEqual({ b: 990, c: 1010 })
       expect(state.remainingPlayers).toEqual(["b", "c"])
       expect(state.roundWinners).toEqual({ c: 30 })
@@ -1002,7 +1032,7 @@ describe("Round logic", () => {
         turnIndex: 1,
         winnerHands: [],
       }
-      winRound(state, { b: 3000 })
+      winRound(state, { b: 3000 }, state.playerIds)
       expect(state.playerChips).toEqual({ a: 0, b: 3000, c: 0 })
       expect(state.remainingPlayers).toEqual(["b"])
       expect(state.roundWinners).toEqual({ b: 3000 })

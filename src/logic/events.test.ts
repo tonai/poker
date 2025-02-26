@@ -107,7 +107,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "e" left
-      playerLeft(state, "e")
+      playerLeft(state, "e", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(state.playerChips).toEqual({ a: 1000, b: 990, c: 980, d: 1000 })
       expect(state.playerIds).toEqual(["a", "b", "c", "d"])
@@ -144,7 +144,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "b" left
-      playerLeft(state, "b")
+      playerLeft(state, "b", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(state.playerChips).toEqual({ a: 1500, c: 1500, d: 1000 })
       expect(state.playerIds).toEqual(["a", "c", "d"])
@@ -200,7 +200,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "b" left
-      playerLeft(state, "b")
+      playerLeft(state, "b", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(state.playerChips).toEqual({ a: 1000, c: 1010, d: 1000 })
       expect(state.playerIds).toEqual(["a", "c", "d"])
@@ -258,7 +258,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "b" left
-      playerLeft(state, "b")
+      playerLeft(state, "b", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(state.playerChips).toEqual({ a: 1000, c: 1010, d: 1000 })
       expect(state.playerIds).toEqual(["a", "c", "d"])
@@ -309,7 +309,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "c" left
-      playerLeft(state, "c")
+      playerLeft(state, "c", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -331,7 +331,7 @@ describe("Event logic", () => {
       })
       expect(nextRound).not.toHaveBeenCalled()
       // "d" left
-      playerLeft(state, "d")
+      playerLeft(state, "d", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -390,7 +390,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "c" left
-      playerLeft(state, "c")
+      playerLeft(state, "c", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -412,7 +412,7 @@ describe("Event logic", () => {
       })
       expect(nextRound).not.toHaveBeenCalled()
       // "d" left
-      playerLeft(state, "d")
+      playerLeft(state, "d", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -473,7 +473,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "c" left (last to speak)
-      playerLeft(state, "c")
+      playerLeft(state, "c", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -532,7 +532,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "b" left
-      playerLeft(state, "b")
+      playerLeft(state, "b", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -554,7 +554,7 @@ describe("Event logic", () => {
       })
       expect(nextRound).not.toHaveBeenCalled()
       // "c" left (last to speak)
-      playerLeft(state, "c")
+      playerLeft(state, "c", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -612,7 +612,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "a" left
-      playerLeft(state, "a")
+      playerLeft(state, "a", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "b"
@@ -634,7 +634,7 @@ describe("Event logic", () => {
       })
       expect(nextRound).not.toHaveBeenCalled()
       // "b" left
-      playerLeft(state, "b")
+      playerLeft(state, "b", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "c"
@@ -693,7 +693,7 @@ describe("Event logic", () => {
         winnerHands: [],
       }
       // "d" left
-      playerLeft(state, "d")
+      playerLeft(state, "d", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "a"
@@ -717,7 +717,7 @@ describe("Event logic", () => {
       })
       expect(nextRound).not.toHaveBeenCalled()
       // "a" left
-      playerLeft(state, "a")
+      playerLeft(state, "a", state.playerIds)
       expect(state.dealerIndex).toEqual(0)
       expect(getDealerId(state.remainingPlayers, state.dealerIndex)).toEqual(
         "b"

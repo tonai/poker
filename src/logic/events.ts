@@ -8,7 +8,8 @@ import { nextRound } from "./round"
 
 export function playerLeft(
   game: GameStateWithPersisted<GameState, Persisted>,
-  playerId: PlayerId
+  playerId: PlayerId,
+  allPlayerIds: PlayerId[]
 ) {
   if (game.playerIds.indexOf(playerId) === -1) {
     // Spectator leaving
@@ -115,7 +116,7 @@ export function playerLeft(
     everyoneAsSpoken &&
     arePlayersAllBettingTheMax
   ) {
-    nextRound(game, foldPlayers)
+    nextRound(game, foldPlayers, allPlayerIds)
   }
 }
 

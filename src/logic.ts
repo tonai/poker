@@ -72,11 +72,11 @@ Rune.initLogic({
     winnerHands: [],
   }),
   actions: {
-    action(action, { game, playerId }) {
+    action(action, { allPlayerIds, game, playerId }) {
       if (game.step !== Step.PLAY) {
         return Rune.invalidAction()
       }
-      addAction(game, playerId, action)
+      addAction(game, playerId, action, allPlayerIds)
     },
     endRound(_, { game, playerId }) {
       if (game.step !== Step.WIN) {
@@ -122,7 +122,7 @@ Rune.initLogic({
         playerJoin(game, playerId)
       }
     },
-    playerLeft(playerId, { game }) {
+    playerLeft(playerId, { allPlayerIds, game }) {
       const index = game.playersReady.indexOf(playerId)
       if (index !== -1) {
         game.playersReady.splice(index, 1)
@@ -130,7 +130,7 @@ Rune.initLogic({
       if (game.step === Step.WAIT) {
         game.playerIds.splice(game.playerIds.indexOf(playerId), 1)
       } else {
-        playerLeft(game, playerId)
+        playerLeft(game, playerId, allPlayerIds)
       }
     },
   },

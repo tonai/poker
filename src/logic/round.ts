@@ -81,7 +81,12 @@ export function nextGame(game: GameState) {
   game.playerChips[bigBlindPlayer] -= game.blind
 }
 
-export function addAction(game: GameState, playerId: PlayerId, action: Action) {
+export function addAction(
+  game: GameState,
+  playerId: PlayerId,
+  action: Action,
+  allPlayerIds: PlayerId[]
+) {
   game.bets.push({
     amount: action.amount,
     id: playerId,
@@ -114,7 +119,7 @@ export function addAction(game: GameState, playerId: PlayerId, action: Action) {
     const winner = game.remainingPlayers.find((id) => !foldPlayers.includes(id))
     if (winner) {
       const playerBets = getBetsByPlayers(game.bets)
-      winRound(game, getShares(playerBets, [winner]))
+      winRound(game, getShares(playerBets, [winner]), allPlayerIds)
     }
     return
   }
@@ -151,7 +156,7 @@ export function addAction(game: GameState, playerId: PlayerId, action: Action) {
 
   if (everyoneAsSpoken && arePlayersAllBettingTheMax) {
     // Start next round
-    nextRound(game, foldPlayers)
+    nextRound(game, foldPlayers, allPlayerIds)
   } else {
     if (action.type !== "fold" && action.type !== "allIn") {
       game.turnIndex++
@@ -160,7 +165,11 @@ export function addAction(game: GameState, playerId: PlayerId, action: Action) {
   }
 }
 
-export function nextRound(game: GameState, foldPlayers: string[]) {
+export function nextRound(
+  game: GameState,
+  foldPlayers: string[],
+  allPlayerIds: PlayerId[]
+) {
   game.round++
   if (game.round === 4) {
     // Showdown
@@ -181,7 +190,7 @@ export function nextRound(game: GameState, foldPlayers: string[]) {
     game.winnerHands = winnerHands
     const winners = winnerHands.map(({ id }) => id)
     const playerBets = getBetsByPlayers(game.bets)
-    winRound(game, getShares(playerBets, winners))
+    winRound(game, getShares(playerBets, winners), allPlayerIds)
   } else {
     game.turnIndex = 0
     // Burn card
@@ -202,12 +211,16 @@ export function nextRound(game: GameState, foldPlayers: string[]) {
       .filter(({ type }) => type === "fold" || type === "allIn")
       .map(({ id }) => id)
     if (skipPlayers.length === game.remainingPlayers.length) {
-      nextRound(game, foldPlayers)
+      nextRound(game, foldPlayers, allPlayerIds)
     }
   }
 }
 
-export function winRound(game: GameState, winners: Record<string, number>) {
+export function winRound(
+  game: GameState,
+  winners: Record<string, number>,
+  allPlayerIds: PlayerId[]
+) {
   game.step = Step.WIN
   game.turnIndex = -1
   game.roundWinners = winners
@@ -220,7 +233,7 @@ export function winRound(game: GameState, winners: Record<string, number>) {
   if (game.remainingPlayers.length === 1) {
     Rune.gameOver({
       players: Object.fromEntries(
-        game.playerIds.map((id) => [
+        allPlayerIds.map((id) => [
           id,
           game.playerChips[id] === 0 ? "LOST" : "WON",
         ])
